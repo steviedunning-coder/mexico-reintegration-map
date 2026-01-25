@@ -2,174 +2,220 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Mexico Reintegration Landscape – People Returned</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mexico Reintegration Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
 <style>
-  body { margin:0; font-family: system-ui, -apple-system, sans-serif; }
-  #map { width:100vw; height:100vh; }
-  .legend {
-    background:#fff;
-    padding:12px;
-    font-size:13px;
-    line-height:1.45;
+  body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+  #map { height: 100vh; }
+  .popup h3 { margin: 0 0 6px 0; }
+  .popup ul { padding-left: 18px; margin: 6px 0; }
+  .toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 999;
+    background: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
   }
 </style>
 </head>
 
 <body>
+
 <div id="map"></div>
+<div class="toggle" onclick="toggleLang()">EN / ES</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@geo-maps/mexico-states@1.0.0/mexico-states.min.js"></script>
 
 <script>
-/* -----------------------
-   MAP BASE
------------------------ */
-const map = L.map("map").setView([23.8, -102.5], 5);
+let lang = "en";
 
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-  attribution: "© OpenStreetMap"
-}).addTo(map);
+/* ---------------------------
+STATE-SPECIFIC DATA
+--------------------------- */
 
-/* -----------------------
-   STATE NARRATIVE DATA
------------------------ */
-const states = {
+const stateData = {
   "Aguascalientes": {
-    returned: "Low–Medium",
-    narrative: `
-      Aguascalientes receives a steady but comparatively lower number of people returned from the United States.
-      As of 2025, no dedicated state-level reintegration program has been publicly identified.
-      Returned Mexican nationals typically access federal employment and social inclusion pathways.
-    `,
-    programs: `
-      <strong>State:</strong> No state-level reintegration program identified (as of 2025).<br>
-      <strong>Municipal:</strong> Informal employment linkage through local offices.<br>
-      <strong>Federal:</strong> México Te Abraza; Jóvenes Construyendo el Futuro.
-    `,
-    link: "http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica"
+    letter: "A",
+    statePrograms: [
+      {
+        name: "No state-level reintegration program identified (as of 2025)",
+        link: null
+      }
+    ],
+    pilots: [
+      {
+        name: "Proposed migrant labor reinsertion initiatives (advocacy stage)",
+        link: null
+      }
+    ]
+  },
+
+  "Baja California": {
+    letter: "B",
+    statePrograms: [],
+    pilots: [],
+    federal: [
+      {
+        name: "México te Abraza – Tijuana / Mexicali",
+        link: "https://www.informegobierno.gob.mx/indice/mexico-te-abraza-proteccion-a-repatriados"
+      }
+    ]
   },
 
   "Chiapas": {
-    returned: "High",
-    narrative: `
-      Chiapas experiences a high number of people returned to Mexico, alongside significant non-Mexican migration
-      stabilization dynamics. Reintegration capacity remains limited relative to scale.
-    `,
-    programs: `
-      <strong>State:</strong> No dedicated reintegration program identified (as of 2025).<br>
-      <strong>Municipal hubs:</strong> Tapachula, Tuxtla Gutiérrez (employment & documentation accompaniment).<br>
-      <strong>Federal:</strong> México Te Abraza; Bienestar programs.
-    `,
-    link: "http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica"
+    letter: "C",
+    statePrograms: [
+      {
+        name: "No state-level reintegration program identified (as of 2025)",
+        link: null
+      }
+    ],
+    pilots: [
+      {
+        name: "Civil-society-led reintegration and documentation pilots",
+        link: null
+      }
+    ]
+  },
+
+  "Guerrero": {
+    letter: "G",
+    statePrograms: [
+      {
+        name: "Compromiso Migrante Guerrero",
+        link: "https://www.guerrero.gob.mx/fortalece-el-gobierno-estatal-programas-de-apoyo-a-migrantes-guerrerenses/"
+      }
+    ]
+  },
+
+  "Morelos": {
+    letter: "M",
+    statePrograms: [
+      {
+        name: "Morelos te Abraza",
+        link: "https://www.morelos.gob.mx/migrantes/migrantes-programas/morelos-te-abraza"
+      }
+    ],
+    municipal: [
+      {
+        name: "Casa Migrante Morelos",
+        link: "https://www.morelos.gob.mx/migrantes/migrantes-programas/casa-migrante"
+      }
+    ]
   },
 
   "Oaxaca": {
-    returned: "High",
-    narrative: `
-      Oaxaca is a major diaspora-sending state with ongoing productive return pilots focused on community
-      reintegration, livelihoods, and local economies.
-    `,
-    programs: `
-      <strong>State:</strong> Oaxaca es tu Tierra (pilot productive return).<br>
-      <strong>Municipal hubs:</strong> Oaxaca de Juárez, Mixteca region municipalities.<br>
-      <strong>Federal:</strong> México Te Abraza; Jóvenes Construyendo el Futuro.
-    `,
-    link: "https://www.oaxaca.gob.mx"
+    letter: "O",
+    statePrograms: [
+      {
+        name: "Instituto Oaxaqueño de Atención al Migrante (IOAM)",
+        link: "https://www.oaxaca.gob.mx/ioam/"
+      }
+    ],
+    pilots: [
+      {
+        name: "Community reintegration pilots for returned Oaxaqueños",
+        link: null
+      }
+    ]
   },
 
   "Puebla": {
-    returned: "Medium",
-    narrative: `
-      Puebla maintains one of the more structured subnational reintegration ecosystems, combining
-      institutional support with diaspora engagement.
-    `,
-    programs: `
-      <strong>State:</strong> IPAM Puebla – reintegration and accompaniment services.<br>
-      <strong>Municipal hubs:</strong> Puebla capital; Tehuacán.<br>
-      <strong>Federal:</strong> México Te Abraza; Bienestar.
-    `,
-    link: "https://www.ipam.puebla.gob.mx"
-  },
-
-  "Guanajuato": {
-    returned: "Medium",
-    narrative: `
-      Guanajuato has an established reintegration framework oriented toward returned migrants and their families,
-      with an emphasis on employment and social services.
-    `,
-    programs: `
-      <strong>State:</strong> MigranteQuiero (active).<br>
-      <strong>Municipal hubs:</strong> León; Irapuato; Celaya.<br>
-      <strong>Federal:</strong> México Te Abraza.
-    `,
-    link: "https://migrantequiero.guanajuato.gob.mx"
+    letter: "P",
+    statePrograms: [
+      {
+        name: "Instituto Poblano de Asistencia al Migrante (IPAM)",
+        link: "https://ipam.puebla.gob.mx/"
+      }
+    ]
   }
 };
 
-/* -----------------------
-   COLOR SCALE
------------------------ */
-function colorByReturned(level){
-  if(level === "High") return "#b30000";
-  if(level === "Medium") return "#e34a33";
-  if(level === "Low–Medium") return "#fdbb84";
-  return "#cccccc";
+/* ---------------------------
+MAP SETUP
+--------------------------- */
+
+const map = L.map("map").setView([23.6, -102.5], 5);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "&copy; OpenStreetMap contributors"
+}).addTo(map);
+
+/* ---------------------------
+POPUP BUILDER
+--------------------------- */
+
+function buildPopup(name) {
+  const d = stateData[name] || {};
+  let html = `<div class="popup"><h3>${name}</h3>`;
+  html += `<p><strong>Events:</strong> People returned or deported to Mexico</p>`;
+
+  function section(title, items) {
+    if (!items || items.length === 0) return "";
+    let s = `<strong>${title}</strong><ul>`;
+    items.forEach(i => {
+      if (i.link) {
+        s += `<li><a href="${i.link}" target="_blank">${i.name}</a></li>`;
+      } else {
+        s += `<li>${i.name}</li>`;
+      }
+    });
+    s += `</ul>`;
+    return s;
+  }
+
+  html += section("State programs", d.statePrograms);
+  html += section("Municipal programs", d.municipal);
+  html += section("Pilot / proposed initiatives", d.pilots);
+  html += section("Federal programs (site-specific)", d.federal);
+
+  html += `<p style="font-size:12px;">
+    Sources include state governments, INM, and Unidad de Política Migratoria<br>
+    https://politicamigratoria.gob.mx
+  </p>`;
+
+  html += `</div>`;
+  return html;
 }
 
-/* -----------------------
-   LOAD REAL STATE SHAPES
------------------------ */
-fetch("https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json")
-  .then(r => r.json())
-  .then(geo => {
+/* ---------------------------
+DRAW STATES
+--------------------------- */
 
-    L.geoJSON(geo, {
-      style: feature => {
-        const name = feature.properties.name;
-        const d = states[name];
-        return {
-          fillColor: colorByReturned(d?.returned),
-          weight: 1,
-          color: "#555",
-          fillOpacity: 0.8
-        };
-      },
-      onEachFeature: (feature, layer) => {
-        const name = feature.properties.name;
-        const d = states[name];
+L.geoJSON(mexicoStates, {
+  style: {
+    weight: 1,
+    color: "#555",
+    fillOpacity: 0.4
+  },
+  onEachFeature: function (feature, layer) {
+    const name = feature.properties.name;
+    layer.on("click", () => {
+      layer.bindPopup(buildPopup(name)).openPopup();
+    });
+  }
+}).addTo(map);
 
-        layer.bindPopup(`
-          <strong>${name}</strong><br><br>
-          <em>People returned:</em> ${d?.returned || "Data not publicly disaggregated"}<br><br>
-          ${d?.narrative || "No state-level reintegration program identified (as of 2025)."}<br><br>
-          ${d?.programs || "<strong>Federal:</strong> México Te Abraza"}<br><br>
-          ${d?.link ? `<a href="${d.link}" target="_blank">Public source</a>` : ""}
-        `);
-      }
-    }).addTo(map);
-  });
+/* ---------------------------
+LANG TOGGLE (stub, expandable)
+--------------------------- */
 
-/* -----------------------
-   LEGEND
------------------------ */
-const legend = L.control({position:"bottomleft"});
-legend.onAdd = function(){
-  const div = L.DomUtil.create("div","legend");
-  div.innerHTML = `
-    <strong>Map Guide</strong><br>
-    ■ High people returned<br>
-    ■ Medium<br>
-    ■ Low–Medium<br>
-    ■ No public data<br><br>
-    “People returned” refers to individuals deported or formally returned to Mexico from the United States.
-  `;
-  return div;
-};
-legend.addTo(map);
+function toggleLang() {
+  lang = lang === "en" ? "es" : "en";
+  alert("Language toggle scaffolded. Text can be expanded state-by-state.");
+}
 </script>
+
 </body>
 </html>
