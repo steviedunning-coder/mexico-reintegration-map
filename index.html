@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Mexico Reintegration Landscape</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    #map {
+      height: 90vh;
+      width: 100%;
+    }
+    .legend {
+      padding: 10px;
+      background: white;
+      line-height: 1.4em;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2 style="padding:10px;">
+Mexico Reintegration Landscape (All 32 States)
+</h2>
+
+<div id="map"></div>
+
+<script>
+  const map = L.map('map').setView([23.6, -102.5], 5);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  /* ===== STATE DATA (EDIT THIS SECTION) ===== */
+  const states = [
+    {
+      name: "Oaxaca",
+      lat: 17.0732,
+      lng: -96.7266,
+      programs: "Women's reintegration shelters, legal aid, community networks",
+      hubs: "Oaxaca de Juárez",
+      events: "High return and displacement-related events",
+      link: "https://www.gob.mx/comar"
+    },
+    {
+      name: "Chiapas",
+      lat: 16.7569,
+      lng: -93.1292,
+      programs: "Migrant shelters, asylum processing",
+      hubs: "Tapachula",
+      events: "High asylum and return events",
+      link: "https://www.gob.mx/inm"
+    },
+    {
+      name: "Sonora",
+      lat: 29.0729,
+      lng: -110.9559,
+      programs: "Limited formal reintegration programs",
+      hubs: "Hermosillo",
+      events: "Return and transit events",
+      link: ""
+    },
+    {
+      name: "Yucatán",
+      lat: 20.9674,
+      lng: -89.5926,
+      programs: "No known centralized programs",
+      hubs: "Mérida",
+      events: "Low recorded events",
+      link: ""
+    }
+    // Continue adding until all 32 states are covered
+  ];
+
+  states.forEach(state => {
+    const popupContent = `
+      <b>${state.name}</b><br/>
+      <strong>Programs:</strong> ${state.programs}<br/>
+      <strong>Municipal hubs:</strong> ${state.hubs}<br/>
+      <strong>Events:</strong> ${state.events}<br/>
+      ${state.link ? `<a href="${state.link}" target="_blank">Official resource</a>` : "No public link"}
+    `;
+
+    L.circleMarker([state.lat, state.lng], {
+      radius: 8,
+      fillColor: "#3b82f6",
+      color: "#1e3a8a",
+      weight: 1,
+      fillOpacity: 0.8
+    })
+    .addTo(map)
+    .bindPopup(popupContent);
+  });
+
+</script>
+
+</body>
+</html>
