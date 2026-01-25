@@ -1,191 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <title>Mexico Reintegration Landscape – People Returned</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<title>Mexico Reintegration & Return Landscape</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-  <style>
-    body { margin:0; font-family: system-ui, sans-serif; }
-    #map { height: 100vh; }
-
-    .legend {
-      background: white;
-      padding: 10px;
-      font-size: 13px;
-      line-height: 1.4;
-      border-radius: 6px;
-    }
-
-    .controls {
-      background: white;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 13px;
-    }
-
-    .controls label {
-      display: block;
-      margin-bottom: 4px;
-    }
-  </style>
+<style>
+  body { margin:0; font-family: system-ui, sans-serif; }
+  #map { height: 100vh; width: 100%; }
+  .legend { background:#fff; padding:10px; line-height:1.4; font-size:13px; }
+  .toggle { position:absolute; top:10px; right:10px; background:#fff; padding:8px; z-index:999; }
+</style>
 </head>
 
 <body>
+
+<div class="toggle">
+  <strong>Language</strong><br>
+  <button onclick="setLang('en')">EN</button>
+  <button onclick="setLang('es')">ES</button>
+</div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-/* ===============================
-   DEFINITIONS (LOCKED)
-================================ */
-const definitions = {
-  events_en: "People returned = people returned or deported to Mexico from the United States, including Mexican nationals and non-Mexicans.",
-  events_es: "Personas retornadas = personas devueltas o deportadas a México desde Estados Unidos, incluidas personas mexicanas y no mexicanas."
-};
+/* ---------------------------
+   GLOBAL COORDINATE SAFETY
+---------------------------- */
+function toLatLng(coord){
+  return [coord[1], coord[0]]; // ALWAYS lng,lat → lat,lng
+}
 
-/* ===============================
-   MAP INIT
-================================ */
-const map = L.map('map').setView([23.6, -102.5], 5);
+/* ---------------------------
+   MAP INIT (LOCKED BOUNDS)
+---------------------------- */
+const map = L.map('map', {
+  maxBounds: [[14.3, -118.5],[32.9, -86.5]],
+  maxBoundsViscosity: 1.0
+}).setView([23.6, -102.5], 5);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  attribution:'© OpenStreetMap'
 }).addTo(map);
 
-/* ===============================
-   FEDERAL PROGRAMS (GLOBAL)
-================================ */
-const federalPrograms = [
+/* ---------------------------
+   LANGUAGE TOGGLE
+---------------------------- */
+let currentLang = 'en';
+function setLang(lang){
+  currentLang = lang;
+  renderPoints();
+}
+
+/* ---------------------------
+   DATA (SAMPLE – STRUCTURE LOCKED)
+   YOU CAN EXTEND SAFELY
+---------------------------- */
+const municipalHubs = [
   {
-    name_en: "México Te Abraza",
-    name_es: "México Te Abraza",
-    url: "https://www.gob.mx/segob/prensa/mexico-te-abraza",
-    level: "Federal"
+    name_en: "Tapachula – México te Abraza",
+    name_es: "Tapachula – México te Abraza",
+    type: "federal",
+    coords: [-92.2634, 14.9056],
+    link: "https://www.gob.mx/segob/migracion"
   },
   {
-    name_en: "Jóvenes Construyendo el Futuro",
-    name_es: "Jóvenes Construyendo el Futuro",
-    url: "https://jovenesconstruyendoelfuturo.stps.gob.mx",
-    level: "Federal (Employment / Youth)"
-  },
-  {
-    name_en: "Programas de Bienestar",
-    name_es: "Programas de Bienestar",
-    url: "https://www.gob.mx/bienestar",
-    level: "Federal (Social & Employment)"
+    name_en: "Tijuana – Integration Hub",
+    name_es: "Tijuana – Centro de Integración",
+    type: "municipal",
+    coords: [-117.0382, 32.5149],
+    link: "https://www.tijuana.gob.mx"
   }
 ];
 
-/* ===============================
-   STATE DATA (ALL 32 STATES)
-================================ */
+/* ---------------------------
+   PEOPLE RETURNED (STATE)
+---------------------------- */
 const states = [
-  "Aguascalientes","Baja California","Baja California Sur","Campeche","Chiapas",
-  "Chihuahua","Coahuila","Colima","Durango","Guanajuato","Guerrero","Hidalgo",
-  "Jalisco","Ciudad de México","Estado de México","Michoacán","Morelos","Nayarit",
-  "Nuevo León","Oaxaca","Puebla","Querétaro","Quintana Roo","San Luis Potosí",
-  "Sinaloa","Sonora","Tabasco","Tamaulipas","Tlaxcala","Veracruz","Yucatán","Zacatecas"
+  {
+    name: "Chiapas",
+    returned_2025: "High",
+    program_en: "No state-level reintegration program identified (as of 2025)",
+    program_es: "No se identificó programa estatal de reintegración (2025)",
+    link: "http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica",
+    centroid: [-92.6334, 16.7569]
+  },
+  {
+    name: "Oaxaca",
+    returned_2025: "High",
+    program_en: "Pilot reintegration initiatives aligned with federal strategies",
+    program_es: "Iniciativas piloto de reintegración alineadas a estrategias federales",
+    link: "https://www.oaxaca.gob.mx",
+    centroid: [-96.7266, 17.0732]
+  }
 ];
 
-/* ===============================
-   MOCK RETURN DATA (STRUCTURAL)
-   Replace later with SEGOB data
-================================ */
-function mockReturnData(state) {
-  return {
-    nationals: Math.floor(Math.random() * 40000) + 2000,
-    nonNationals: Math.floor(Math.random() * 12000)
-  };
+/* ---------------------------
+   LAYERS
+---------------------------- */
+let hubLayer = L.layerGroup().addTo(map);
+let stateLayer = L.layerGroup().addTo(map);
+
+/* ---------------------------
+   RENDER
+---------------------------- */
+function renderPoints(){
+  hubLayer.clearLayers();
+  stateLayer.clearLayers();
+
+  municipalHubs.forEach(h => {
+    L.circleMarker(
+      toLatLng(h.coords),
+      { radius:6, color:'#0057b7', fillOpacity:0.9 }
+    )
+    .bindPopup(`
+      <strong>${currentLang==='en'?h.name_en:h.name_es}</strong><br>
+      Level: ${h.type}<br>
+      <a href="${h.link}" target="_blank">Program link</a>
+    `)
+    .addTo(hubLayer);
+  });
+
+  states.forEach(s => {
+    L.circleMarker(
+      toLatLng(s.centroid),
+      { radius:8, color:'#b30000', fillOpacity:0.7 }
+    )
+    .bindPopup(`
+      <strong>${s.name}</strong><br>
+      <em>${currentLang==='en'?'People returned':'Personas retornadas'}: ${s.returned_2025}</em><br><br>
+      ${currentLang==='en'?s.program_en:s.program_es}<br>
+      <a href="${s.link}" target="_blank">Data source</a>
+    `)
+    .addTo(stateLayer);
+  });
 }
 
-/* ===============================
-   POPUP BUILDER
-================================ */
-function buildPopup(stateName, lang="en") {
-  const returns = mockReturnData(stateName);
+renderPoints();
 
-  const federalList = federalPrograms.map(p =>
-    `<li><a href="${p.url}" target="_blank">${lang==="en"?p.name_en:p.name_es}</a></li>`
-  ).join("");
-
-  return `
-    <strong>${stateName}</strong><br/><br/>
-
-    <em>${lang==="en"?definitions.events_en:definitions.events_es}</em><br/><br/>
-
-    <strong>${lang==="en"?"People returned (latest available year)":"Personas retornadas (último año disponible)"}:</strong>
-    <ul>
-      <li>${lang==="en"?"Mexican nationals":"Personas mexicanas"}: ${returns.nationals.toLocaleString()}</li>
-      <li>${lang==="en"?"Non-Mexicans returned to Mexico":"Personas no mexicanas retornadas a México"}: ${returns.nonNationals.toLocaleString()}</li>
-    </ul>
-
-    <strong>${lang==="en"?"Federal programs":"Programas federales"}:</strong>
-    <ul>${federalList}</ul>
-
-    <strong>${lang==="en"?"State-level reintegration":"Reintegración a nivel estatal"}:</strong>
-    <p><em>${lang==="en"?
-      "No state-level reintegration program identified (as of 2025).":
-      "No se identificó un programa estatal de reintegración (a partir de 2025)."}
-    </em></p>
-
-    <strong>${lang==="en"?"Municipal / civil-society integration hubs":"Espacios municipales / sociedad civil"}:</strong>
-    <p><em>${lang==="en"?
-      "No municipal integration hubs identified (as of 2025).":
-      "No se identificaron espacios municipales de integración (a partir de 2025)."}
-    </em></p>
-
-    <hr/>
-    <small>
-      Source: <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica" target="_blank">
-      Unidad de Política Migratoria (SEGOB)</a>
-    </small>
-  `;
-}
-
-/* ===============================
-   BASIC STATE MARKERS (PLACEHOLDER)
-================================ */
-states.forEach((state, i) => {
-  const lat = 15 + Math.random()*15;
-  const lon = -110 + Math.random()*20;
-
-  L.circleMarker([lat, lon], {
-    radius: 6,
-    fillColor: "#4f83cc",
-    color: "#333",
-    weight: 1,
-    fillOpacity: 0.8
-  })
-  .bindPopup(buildPopup(state, "en"))
-  .addTo(map);
-});
-
-/* ===============================
+/* ---------------------------
    LEGEND
-================================ */
-const legend = L.control({position: 'bottomright'});
-legend.onAdd = function () {
-  const div = L.DomUtil.create('div', 'legend');
+---------------------------- */
+const legend = L.control({position:'bottomleft'});
+legend.onAdd = function(){
+  const div = L.DomUtil.create('div','legend');
   div.innerHTML = `
-    <strong>Map guide</strong><br/>
-    ● Circle = state<br/>
-    Color intensity = people returned<br/><br/>
-    <em>People returned</em> means people returned or deported to Mexico from the U.S.<br/><br/>
-    <strong>Sources</strong><br/>
-    SEGOB – Unidad de Política Migratoria
+    <strong>Map Guide</strong><br>
+    🔵 Municipal / Federal hubs<br>
+    🔴 State-level people returned<br><br>
+    “People returned” = deported or formally returned to Mexico
   `;
   return div;
 };
 legend.addTo(map);
-</script>
 
+</script>
 </body>
 </html>
