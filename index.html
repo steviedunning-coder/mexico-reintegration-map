@@ -2,26 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Mexico Reintegration Landscape (2025–2026)</title>
+  <title>Mexico Reintegration Landscape</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
   <style>
-    body { margin:0; font-family: system-ui, sans-serif; }
-    #map { height: 100vh; }
-    .legend {
-      background: white;
-      padding: 10px;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    .state-label {
-      font-weight: bold;
-      color: #111;
-      font-size: 14px;
-    }
+    body { margin:0; font-family: Arial, sans-serif; }
+    #map { height: 100vh; width: 100vw; }
+    .popup h3 { margin: 0 0 6px 0; }
+    .popup p { margin: 4px 0; font-size: 13px; }
+    .popup ul { margin: 4px 0 4px 16px; padding: 0; }
   </style>
 </head>
 <body>
@@ -29,112 +21,257 @@
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@mapbox/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
 
 <script>
-/* ---------------- MAP SETUP ---------------- */
-const map = L.map('map').setView([23.6, -102.5], 5);
+const map = L.map("map").setView([23.6, -102.5], 5);
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© OpenStreetMap'
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors"
 }).addTo(map);
 
-/* ---------------- DEFINITIONS ---------------- */
-const definitionHTML = `
-<b>People Returned:</b> Individuals returned or deported to Mexico through U.S. or Mexican migration processes.<br>
-<b>Source:</b>
-<a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica" target="_blank">
-Política Migratoria (Gobierno de México)
-</a>
-`;
+/* ---------- STATE CONTENT (CANONICAL) ---------- */
 
-/* ---------------- STATE DATA ---------------- */
 const stateInfo = {
-  "Aguascalientes": {
-    letter: "A",
-    content: `
-    <b>People Returned (est. 2026):</b> Moderate<br>
-    <b>State Program:</b> No current state-level reintegration program identified (as of 2025).<br>
-    <b>Pilots / Proposed:</b> Workforce linkage via local universidades técnicas.<br>
-    <b>Federal:</b> Access via municipal Mexico Te Abraza referral points.<br>
-    `
-  },
-  "Baja California": {
-    letter: "B",
-    content: `
-    <b>People Returned (est. 2026):</b> Very High (border returns).<br>
-    <b>State Program:</b> Comisión Estatal de Atención al Migrante.<br>
-    <b>Municipal:</b> Tijuana / Mexicali Mexico Te Abraza centers.<br>
-    <b>Pilots:</b> Shelter-to-employment transition programs.<br>
-    `
-  },
-  "Chiapas": {
-    letter: "C",
-    content: `
-    <b>People Returned (est. 2026):</b> High (mixed nationals).<br>
-    <b>State Program:</b> No formal reintegration program identified.<br>
-    <b>Pilots:</b> NGO-led community reintegration & livelihoods.<br>
-    <b>Note:</b> Focus on non-Mexican populations transitioning status.<br>
-    `
-  },
-
-  /* --- ALL OTHER STATES (CONDENSED BUT UNIQUE) --- */
-  "Oaxaca": { letter:"O", content:"High return; state migrant institute active; municipal reintegration pilots; strong NGO ecosystem." },
-  "Puebla": { letter:"P", content:"High return; employment linkage pilots; no formal state reintegration policy." },
-  "Guanajuato": { letter:"G", content:"Return-migration focused state programs; remittance + employment alignment." },
-  "Michoacán": { letter:"M", content:"Longstanding migrant return programs; local reintegration initiatives." },
-
-  "CDMX": { letter:"C", content:"Federal access hub; documentation & employment pathways." },
-  "Jalisco": { letter:"J", content:"State migrant attention institute; skills certification pilots." },
-  "Nuevo León": { letter:"N", content:"Industrial employment linkage; no dedicated reintegration law." },
-  "Sonora": { letter:"S", content:"Border return coordination; municipal referral sites." },
-  "Tamaulipas": { letter:"T", content:"Border-focused returns; limited civilian reintegration capacity." },
-
-  /* Remaining states default */
+  "Aguascalientes": `
+    <h3>Aguascalientes</h3>
+    <p><strong>People returned (2025):</strong> Low–moderate volume; data not publicly disaggregated.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified (as of 2025).</p>
+    <p><strong>Municipal initiatives:</strong> Limited employment linkage via local industry.</p>
+    <p><strong>Federal options:</strong> Jóvenes Construyendo el Futuro; Bienestar services.</p>
+  `,
+  "Baja California": `
+    <h3>Baja California</h3>
+    <p><strong>People returned (2025):</strong> High volume of people returned and deported from the U.S.</p>
+    <p><strong>State programs:</strong> Employment linkage and documentation support coordinated with NGOs.</p>
+    <p><strong>Municipal initiatives:</strong> Tijuana, Mexicali reintegration and job placement programs.</p>
+    <p><strong>Federal options:</strong> Mexico Te Abraza sites in border municipalities.</p>
+  `,
+  "Baja California Sur": `
+    <h3>Baja California Sur</h3>
+    <p><strong>People returned (2025):</strong> Low volume.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Tourism-sector labor absorption.</p>
+    <p><strong>Federal options:</strong> Bienestar; JCF.</p>
+  `,
+  "Campeche": `
+    <h3>Campeche</h3>
+    <p><strong>People returned (2025):</strong> Low volume.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> None documented.</p>
+    <p><strong>Federal options:</strong> Bienestar programs.</p>
+  `,
+  "Chiapas": `
+    <h3>Chiapas</h3>
+    <p><strong>People returned (2025):</strong> Moderate returns of Mexican nationals; high presence of non-Mexican migrants stabilizing.</p>
+    <p><strong>State programs:</strong> Refugee and migrant integration initiatives coordinated with COMAR.</p>
+    <p><strong>Municipal initiatives:</strong> Tapachula integration and labor insertion programs.</p>
+    <p><strong>Federal options:</strong> Bienestar; refugee regularization pathways.</p>
+  `,
+  "Chihuahua": `
+    <h3>Chihuahua</h3>
+    <p><strong>People returned (2025):</strong> High border return volume.</p>
+    <p><strong>State programs:</strong> Employment and documentation coordination.</p>
+    <p><strong>Municipal initiatives:</strong> Ciudad Juárez workforce integration.</p>
+    <p><strong>Federal options:</strong> Mexico Te Abraza border support.</p>
+  `,
+  "Coahuila": `
+    <h3>Coahuila</h3>
+    <p><strong>People returned (2025):</strong> Moderate–high.</p>
+    <p><strong>State programs:</strong> Employment linkage with manufacturing sector.</p>
+    <p><strong>Municipal initiatives:</strong> Saltillo and Piedras Negras job placement.</p>
+    <p><strong>Federal options:</strong> Bienestar employment programs.</p>
+  `,
+  "Colima": `
+    <h3>Colima</h3>
+    <p><strong>People returned (2025):</strong> Low.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> None documented.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Durango": `
+    <h3>Durango</h3>
+    <p><strong>People returned (2025):</strong> Low–moderate.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> None documented.</p>
+    <p><strong>Federal options:</strong> JCF; Bienestar.</p>
+  `,
+  "Guanajuato": `
+    <h3>Guanajuato</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> <a href="https://migrantequiero.guanajuato.gob.mx" target="_blank">Migrante Quiero</a> (active).</p>
+    <p><strong>Municipal initiatives:</strong> León, Celaya returnee employment.</p>
+    <p><strong>Federal options:</strong> Bienestar; JCF.</p>
+  `,
+  "Guerrero": `
+    <h3>Guerrero</h3>
+    <p><strong>People returned (2025):</strong> High out-migration; moderate returns.</p>
+    <p><strong>State programs:</strong> No active reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Proposed productive return pilots.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Hidalgo": `
+    <h3>Hidalgo</h3>
+    <p><strong>People returned (2025):</strong> Moderate.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Limited employment linkage.</p>
+    <p><strong>Federal options:</strong> JCF.</p>
+  `,
+  "Jalisco": `
+    <h3>Jalisco</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> State migrant support and productive return programs.</p>
+    <p><strong>Municipal initiatives:</strong> Guadalajara integration services.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Mexico City": `
+    <h3>Mexico City</h3>
+    <p><strong>People returned (2025):</strong> High absorptive capacity.</p>
+    <p><strong>State programs:</strong> Multi-agency migrant and returnee integration.</p>
+    <p><strong>Municipal initiatives:</strong> Citywide employment and documentation.</p>
+    <p><strong>Federal options:</strong> Full federal program access.</p>
+  `,
+  "Estado de México": `
+    <h3>Estado de México</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> Fondo de Apoyo a Migrantes (active).</p>
+    <p><strong>Municipal initiatives:</strong> Multiple industrial corridors.</p>
+    <p><strong>Federal options:</strong> Bienestar; JCF.</p>
+  `,
+  "Michoacán": `
+    <h3>Michoacán</h3>
+    <p><strong>People returned (2025):</strong> Very high.</p>
+    <p><strong>State programs:</strong> Pilot productive return programs.</p>
+    <p><strong>Municipal initiatives:</strong> Uruapan, Morelia pilots.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Morelos": `
+    <h3>Morelos</h3>
+    <p><strong>People returned (2025):</strong> Moderate.</p>
+    <p><strong>State programs:</strong> Morelos te Abraza (active).</p>
+    <p><strong>Municipal initiatives:</strong> Cuernavaca reintegration support.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Nayarit": `
+    <h3>Nayarit</h3>
+    <p><strong>People returned (2025):</strong> Low.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Tourism labor absorption.</p>
+    <p><strong>Federal options:</strong> JCF.</p>
+  `,
+  "Nuevo León": `
+    <h3>Nuevo León</h3>
+    <p><strong>People returned (2025):</strong> Moderate–high.</p>
+    <p><strong>State programs:</strong> Employment-focused reintegration.</p>
+    <p><strong>Municipal initiatives:</strong> Monterrey private-sector hiring.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Oaxaca": `
+    <h3>Oaxaca</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> Oaxaca es tu Tierra (active).</p>
+    <p><strong>Municipal initiatives:</strong> Community-based productive return.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Puebla": `
+    <h3>Puebla</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> IPAM Puebla (active).</p>
+    <p><strong>Municipal initiatives:</strong> Puebla capital integration.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Querétaro": `
+    <h3>Querétaro</h3>
+    <p><strong>People returned (2025):</strong> Moderate.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Industrial corridor hiring.</p>
+    <p><strong>Federal options:</strong> JCF.</p>
+  `,
+  "Quintana Roo": `
+    <h3>Quintana Roo</h3>
+    <p><strong>People returned (2025):</strong> Moderate.</p>
+    <p><strong>State programs:</strong> Labor absorption via tourism sector.</p>
+    <p><strong>Municipal initiatives:</strong> Cancún, Playa del Carmen.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "San Luis Potosí": `
+    <h3>San Luis Potosí</h3>
+    <p><strong>People returned (2025):</strong> Moderate.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Industrial employment.</p>
+    <p><strong>Federal options:</strong> JCF.</p>
+  `,
+  "Sinaloa": `
+    <h3>Sinaloa</h3>
+    <p><strong>People returned (2025):</strong> Moderate.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Agricultural employment.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Sonora": `
+    <h3>Sonora</h3>
+    <p><strong>People returned (2025):</strong> High border returns.</p>
+    <p><strong>State programs:</strong> Border reintegration coordination.</p>
+    <p><strong>Municipal initiatives:</strong> Nogales, Hermosillo.</p>
+    <p><strong>Federal options:</strong> Mexico Te Abraza.</p>
+  `,
+  "Tabasco": `
+    <h3>Tabasco</h3>
+    <p><strong>People returned (2025):</strong> Low–moderate.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> None documented.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Tamaulipas": `
+    <h3>Tamaulipas</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> Limited state reintegration coordination.</p>
+    <p><strong>Municipal initiatives:</strong> Reynosa, Matamoros.</p>
+    <p><strong>Federal options:</strong> Mexico Te Abraza.</p>
+  `,
+  "Tlaxcala": `
+    <h3>Tlaxcala</h3>
+    <p><strong>People returned (2025):</strong> Low.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> None documented.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Veracruz": `
+    <h3>Veracruz</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> No comprehensive reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Port-city employment.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `,
+  "Yucatán": `
+    <h3>Yucatán</h3>
+    <p><strong>People returned (2025):</strong> Low–moderate.</p>
+    <p><strong>State programs:</strong> No state-level reintegration program identified.</p>
+    <p><strong>Municipal initiatives:</strong> Mérida labor absorption.</p>
+    <p><strong>Federal options:</strong> JCF.</p>
+  `,
+  "Zacatecas": `
+    <h3>Zacatecas</h3>
+    <p><strong>People returned (2025):</strong> High.</p>
+    <p><strong>State programs:</strong> No active reintegration program; proposed pilots.</p>
+    <p><strong>Municipal initiatives:</strong> Diaspora-linked initiatives.</p>
+    <p><strong>Federal options:</strong> Bienestar.</p>
+  `
 };
 
-/* ---------------- LOAD GEOJSON ---------------- */
-/* Stable, correct Mexico states GeoJSON */
-fetch("https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json")
-  .then(res => res.json())
-  .then(data => {
+/* ---------- LOAD STATES ---------- */
 
-    L.geoJSON(data, {
-      style: {
-        color: "#333",
-        weight: 1,
-        fillOpacity: 0.15
-      },
-      onEachFeature: function (feature, layer) {
-        const name = feature.properties.name;
-        const info = stateInfo[name];
-
-        let popup = `<h3>${name}</h3>${definitionHTML}<br><br>`;
-
-        if (info) {
-          popup += info.content;
-        } else {
-          popup += `
-          <b>People Returned:</b> Data under review.<br>
-          <b>State Program:</b> No current state-level reintegration program identified (as of 2025).<br>
-          <b>Pilots:</b> None publicly documented.<br>
-          `;
-        }
-
-        layer.bindPopup(popup);
-
-        if (info) {
-          const center = layer.getBounds().getCenter();
-          L.marker(center, {
-            icon: L.divIcon({
-              className: 'state-label',
-              html: info.letter,
-              iconSize: [20, 20]
-            })
-          }).addTo(map);
-        }
-      }
-    }).addTo(map);
+omnivore.geojson(
+  "https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json"
+).on("ready", function () {
+  this.eachLayer(function (layer) {
+    const name = layer.feature.properties.name;
+    if (stateInfo[name]) {
+      layer.bindPopup(`<div class="popup">${stateInfo[name]}</div>`);
+    }
   });
+  this.addTo(map);
+});
 </script>
 
 </body>
