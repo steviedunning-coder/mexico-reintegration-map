@@ -1,192 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Mexico Reintegration Landscape</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8"/>
+<title>Mexico Reintegration & Integration Landscape (2026)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
-body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
-#map { height: 90vh; width: 100%; }
-.header { display:flex; justify-content:space-between; align-items:center; padding:10px; }
-h1 { font-size:20px; margin:0; }
-.controls button {
-  margin-left:8px; padding:6px 10px;
-  border:1px solid #333; background:#fff; cursor:pointer;
-}
-.note { font-size:13px; padding:0 10px 10px; color:#444; }
+  body { margin:0; font-family: system-ui, sans-serif; }
+  #map { height: 100vh; }
+
+  .legend {
+    background: white;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    border-radius: 6px;
+    box-shadow: 0 0 6px rgba(0,0,0,.25);
+  }
+
+  .lang-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 999;
+    background: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0,0,0,.2);
+    font-size: 13px;
+  }
 </style>
 </head>
 
 <body>
-
-<div class="header">
-  <h1 id="title">Mexico Reintegration Landscape (2026)</h1>
-  <div class="controls">
-    <button onclick="setLanguage('en')">EN</button>
-    <button onclick="setLanguage('es')">ES</button>
-  </div>
-</div>
-
-<p class="note" id="subtitle">
-Focus on stabilization, employment, and productive return (not emergency services).
-</p>
-
+<div class="lang-toggle" onclick="toggleLang()">EN / ES</div>
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-// --------------------------------------------------
-// LANGUAGE STRINGS
-// --------------------------------------------------
 let lang = "en";
 
-const strings = {
-  en: {
-    title: "Mexico Reintegration Landscape (2026)",
-    subtitle: "Focus on stabilization, employment, and productive return (not emergency services).",
-    active: "Active programs",
-    pilot: "Pilot programs",
-    none: "No dedicated program",
-    nationals: "Mexican nationals",
-    nonnationals: "Non-Mexican integration",
-    hub: "Municipal hub",
-    events: "Migration events (2025)",
-    returnees: "Estimated returnees 2026",
-    program: "Program"
-  },
-  es: {
-    title: "Panorama de Reintegración en México (2026)",
-    subtitle: "Enfoque en estabilización, empleo y retorno productivo (no servicios de emergencia).",
-    active: "Programas activos",
-    pilot: "Programas piloto",
-    none: "Sin programa dedicado",
-    nationals: "Personas mexicanas retornadas",
-    nonnationals: "Integración de personas no mexicanas",
-    hub: "Nodo municipal",
-    events: "Eventos migratorios (2025)",
-    returnees: "Personas retornadas estimadas 2026",
-    program: "Programa"
-  }
-};
-
-function setLanguage(l){
-  lang = l;
-  document.getElementById("title").innerText = strings[l].title;
-  document.getElementById("subtitle").innerText = strings[l].subtitle;
-  map.eachLayer(l => { if(l.getPopup) l.closePopup(); });
-}
-
-// --------------------------------------------------
-// MAP BASE
-// --------------------------------------------------
-var map = L.map('map').setView([23.5, -102], 5);
+// ---------------- BASE MAP ----------------
+const map = L.map('map').setView([23.8, -102.5], 5);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution:'&copy; OpenStreetMap contributors'
+  attribution: '© OpenStreetMap'
 }).addTo(map);
 
-// --------------------------------------------------
-// STATE PROGRAM DATA (NATIONALS)
-// --------------------------------------------------
-const statePrograms = {
-  "Guanajuato": {status:"Active", returnees:29000, program:"Migrante Quiero", link:"https://migrantequiero.guanajuato.gob.mx"},
-  "Oaxaca": {status:"Active", returnees:24000, program:"Oaxaca es tu Tierra", link:"https://www.oaxaca.gob.mx"},
-  "Michoacán": {status:"Pilot", returnees:26000, program:"Productive Return Pilot", link:"https://michoacan.gob.mx"},
-  "Puebla": {status:"Active", returnees:21000, program:"IPAM Puebla", link:"https://ipam.puebla.gob.mx"},
-  "Estado de México": {status:"Active", returnees:31000, program:"Fondo de Apoyo a Migrantes", link:"https://edomex.gob.mx"}
-};
-
-// --------------------------------------------------
-// MUNICIPAL HUBS (POINT MARKERS)
-// --------------------------------------------------
-const hubs = [
-  {name:"Tijuana", lat:32.5149, lon:-117.038, type:"nationals", notes:"Border employment hub"},
-  {name:"Ciudad Juárez", lat:31.6904, lon:-106.4245, type:"nationals", notes:"High-volume return hub"},
-  {name:"Oaxaca de Juárez", lat:17.0732, lon:-96.7266, type:"nationals", notes:"Productive return coordination"},
-  {name:"Tapachula", lat:14.9056, lon:-92.2616, type:"nonnationals", notes:"Non-Mexican stabilization & work pathways"},
-  {name:"Mexico City", lat:19.4326, lon:-99.1332, type:"both", notes:"Multi-agency integration"}
+// ---------------- STATE DATA ----------------
+const states = [
+ ["Oaxaca",17.07,-96.73,49000,6000,"state","Oaxaca es tu Tierra","https://www.oaxaca.gob.mx"],
+ ["Guanajuato",21.02,-101.26,48000,6000,"state","MigranteQuiero","https://migrantequiero.guanajuato.gob.mx"],
+ ["Puebla",19.04,-98.21,47000,7000,"state","IPAM Puebla",""],
+ ["Michoacán",19.57,-101.71,56000,5000,"state","Productive return pilots",""],
+ ["Chiapas",16.76,-93.13,28000,120000,"federal","COMAR + labor pathways","https://www.gob.mx/comar"],
+ ["Baja California",32.51,-117.04,42000,38000,"federal","México Te Abraza","https://www.gob.mx/migracion"]
 ];
 
-// --------------------------------------------------
-// LAYERS
-// --------------------------------------------------
-const activeLayer = L.layerGroup();
-const pilotLayer  = L.layerGroup();
-const noneLayer   = L.layerGroup();
-const nationalsLayer = L.layerGroup();
-const nonNationalsLayer = L.layerGroup();
+// ---------------- MUNICIPAL HUBS ----------------
+const municipalHubs = [
+ ["Tijuana",32.5149,-117.0382],
+ ["Ciudad Juárez",31.6904,-106.4245],
+ ["Tapachula",14.906,-92.263],
+ ["Mexico City",19.4326,-99.1332],
+ ["Monterrey",25.6866,-100.3161],
+ ["Puebla",19.0414,-98.2063],
+ ["Guadalajara",20.6597,-103.3496],
+ ["Oaxaca de Juárez",17.0732,-96.7266]
+];
 
-// --------------------------------------------------
-// GEOJSON STATES
-// --------------------------------------------------
-fetch("https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json")
-.then(r=>r.json())
-.then(data=>{
-  L.geoJSON(data,{
-    style:f=>{
-      const d = statePrograms[f.properties.name];
-      return {
-        fillColor: d ? (d.status==="Active"?"#1a9850":"#fee08b") : "#d73027",
-        weight:1, color:"#333", fillOpacity:0.7
-      };
-    },
-    onEachFeature:(f,l)=>{
-      const d = statePrograms[f.properties.name];
-      const status = d ? d.status : "None";
-      l.bindPopup(()=>{
-        return `
-        <strong>${f.properties.name}</strong><br>
-        ${strings[lang].program}: ${d ? d.program : strings[lang].none}<br>
-        ${strings[lang].returnees}: ${d ? d.returnees.toLocaleString() : "—"}<br>
-        <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica" target="_blank">
-        Fuente federal (2025)</a>`;
-      });
-      if(status==="Active") activeLayer.addLayer(l);
-      else if(status==="Pilot") pilotLayer.addLayer(l);
-      else noneLayer.addLayer(l);
-    }
-  }).addTo(map);
+// ---------------- LAYERS ----------------
+const nationals = L.layerGroup();
+const nonNationals = L.layerGroup();
+const federalPrograms = L.layerGroup();
+const statePrograms = L.layerGroup();
+const municipalLayer = L.layerGroup();
+
+states.forEach(s => {
+ const [name,lat,lon,nat,non,level,program,link] = s;
+ const total = nat + non;
+
+ const popup = () => `
+  <b>${name}</b><br/>
+  ${lang==="en" ? "Estimated 2026 events" : "Eventos estimados 2026"}:<br/>
+  ${lang==="en" ? "Mexican nationals" : "Nacionales mexicanos"}: ${nat.toLocaleString()}<br/>
+  ${lang==="en" ? "Non-Mexicans" : "Personas no mexicanas"}: ${non.toLocaleString()}<br/><br/>
+  ${lang==="en" ? "Program" : "Programa"}: ${program}<br/>
+  ${link ? `<a href="${link}" target="_blank">${lang==="en"?"Link":"Enlace"}</a>` : ""}
+ `;
+
+ if (nat>0){
+  L.circleMarker([lat,lon],{
+   radius:Math.sqrt(total)/12,
+   color:"#1f77b4",
+   fillOpacity:.7
+  }).bindPopup(popup).addTo(nationals);
+ }
+
+ if (non>0){
+  L.circleMarker([lat,lon],{
+   radius:Math.sqrt(total)/12,
+   color:"#ff7f0e",
+   fillOpacity:.6
+  }).bindPopup(popup).addTo(nonNationals);
+ }
+
+ if(level==="federal") federalPrograms.addLayer(L.circle([lat,lon],{radius:30000}));
+ if(level==="state") statePrograms.addLayer(L.circle([lat,lon],{radius:30000}));
 });
 
-// --------------------------------------------------
-// HUB MARKERS
-// --------------------------------------------------
-hubs.forEach(h=>{
-  const marker = L.circleMarker([h.lat,h.lon],{
-    radius:6,
-    color:"#000",
-    fillColor: h.type==="nonnationals"?"#4575b4":"#f46d43",
-    fillOpacity:0.9
-  }).bindPopup(()=>{
-    return `<strong>${h.name}</strong><br>
-    ${strings[lang].hub}<br>${h.notes}`;
-  });
-
-  if(h.type==="nationals"||h.type==="both") nationalsLayer.addLayer(marker);
-  if(h.type==="nonnationals"||h.type==="both") nonNationalsLayer.addLayer(marker);
+// Municipal hubs
+municipalHubs.forEach(h=>{
+ L.marker([h[1],h[2]])
+  .bindPopup(`<b>${h[0]}</b><br/>Municipal integration hub`)
+  .addTo(municipalLayer);
 });
 
-// --------------------------------------------------
-// ADD LAYERS + CONTROLS
-// --------------------------------------------------
-activeLayer.addTo(map);
-pilotLayer.addTo(map);
-noneLayer.addTo(map);
-nationalsLayer.addTo(map);
-nonNationalsLayer.addTo(map);
+nationals.addTo(map);
+nonNationals.addTo(map);
+municipalLayer.addTo(map);
 
-L.control.layers(null,{
-  "Active programs":activeLayer,
-  "Pilot programs":pilotLayer,
-  "No program":noneLayer,
-  "Nationals (hubs)":nationalsLayer,
-  "Non-nationals (hubs)":nonNationalsLayer
-}).addTo(map);
+// ---------------- CONTROLS ----------------
+const controls = L.control.layers(null,{
+ "Mexican nationals returned/deported": nationals,
+ "Non-Mexican integration events": nonNationals,
+ "Federal programs (incl. México Te Abraza)": federalPrograms,
+ "State-level programs": statePrograms,
+ "Municipal integration hubs": municipalLayer
+},{collapsed:false}).addTo(map);
+
+// ---------------- LEGEND ----------------
+const legend = L.control({position:"bottomright"});
+legend.onAdd = function(){
+ const div = L.DomUtil.create("div","legend");
+ div.innerHTML = `
+  <b>${lang==="en"?"Map guide":"Guía del mapa"}</b><br/><br/>
+  🔵 ${lang==="en"?"Mexican nationals":"Nacionales mexicanos"}<br/>
+  🟠 ${lang==="en"?"Non-Mexicans":"Personas no mexicanas"}<br/>
+  📍 ${lang==="en"?"Municipal hub":"Nodo municipal"}<br/><br/>
+  ${lang==="en"?"Circle size = 2026 events":"Tamaño = eventos 2026"}<br/>
+  ${lang==="en"?"Data aligned with Política Migratoria (2025)":"Datos alineados con Política Migratoria (2025)"}
+ `;
+ return div;
+};
+legend.addTo(map);
+
+// ---------------- LANGUAGE TOGGLE ----------------
+function toggleLang(){
+ lang = lang==="en" ? "es" : "en";
+ map.eachLayer(l=>{
+  if(l.getPopup) {
+   const p = l.getPopup();
+   if(p) l.bindPopup(p.getContent());
+  }
+ });
+ legend.remove();
+ legend.addTo(map);
+}
 </script>
-
 </body>
 </html>
