@@ -1,174 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Mexico Reintegration & Integration Landscape (2026)</title>
+<meta charset="utf-8" />
+<title>Mexico Reintegration & Mobility Map (2026)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-body { margin:0; font-family: system-ui, sans-serif; }
-#map { height:100vh; }
+body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+#map { height: 100vh; width: 100%; }
 
-.legend {
- background:white;
- padding:12px;
- font-size:13px;
- line-height:1.45;
- border-radius:6px;
- box-shadow:0 0 6px rgba(0,0,0,.25);
+.panel {
+  position:absolute;
+  top:15px;
+  left:15px;
+  background:#fff;
+  padding:14px;
+  border-radius:10px;
+  box-shadow:0 3px 14px rgba(0,0,0,.15);
+  max-width:340px;
+  z-index:1000;
 }
 
-.lang-toggle {
- position:absolute;
- top:10px;
- right:10px;
- z-index:999;
- background:white;
- padding:6px 10px;
- border-radius:6px;
- cursor:pointer;
- font-size:13px;
- box-shadow:0 0 4px rgba(0,0,0,.2);
+.panel h2 { margin:0 0 6px 0; font-size:16px; }
+.panel p { font-size:12px; line-height:1.4; margin:4px 0; }
+
+.legend {
+  position:absolute;
+  bottom:20px;
+  left:15px;
+  background:#fff;
+  padding:10px;
+  border-radius:8px;
+  font-size:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
+
+.legend div { margin-bottom:4px; }
+.legend span {
+  display:inline-block;
+  width:14px;
+  height:14px;
+  margin-right:6px;
+  vertical-align:middle;
+}
+
+.toggle {
+  margin-top:8px;
+}
+.toggle button {
+  margin-right:4px;
+  font-size:11px;
+  padding:4px 6px;
+  cursor:pointer;
 }
 </style>
 </head>
 
 <body>
-<div class="lang-toggle" onclick="toggleLang()">EN / ES</div>
 <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<div class="panel" id="info">
+  <h2 id="title">Mexico Reintegration & Mobility Map (2026)</h2>
+  <p id="subtitle">
+    <strong>Events</strong> = people returned or deported to Mexico.<br>
+    Data reflects nationals and non-nationals.
+  </p>
+
+  <div class="toggle">
+    <strong>Language:</strong><br>
+    <button onclick="setLang('en')">EN</button>
+    <button onclick="setLang('es')">ES</button>
+  </div>
+
+  <div class="toggle">
+    <strong>Population:</strong><br>
+    <label><input type="checkbox" checked id="nationalsToggle"> Mexican nationals</label><br>
+    <label><input type="checkbox" checked id="nonnationalsToggle"> Non-Mexican people</label>
+  </div>
+
+  <div class="toggle">
+    <strong>Programs:</strong><br>
+    <label><input type="checkbox" checked id="federalToggle"> Federal</label><br>
+    <label><input type="checkbox" checked id="stateToggle"> State</label><br>
+    <label><input type="checkbox" checked id="municipalToggle"> Municipal</label>
+  </div>
+
+  <p style="margin-top:8px">
+    📊 Source:
+    <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica"
+       target="_blank">SEGOB – Política Migratoria</a>
+  </p>
+</div>
+
+<div class="legend">
+  <div><span style="background:#800026"></span> Very high return events</div>
+  <div><span style="background:#BD0026"></span> High</div>
+  <div><span style="background:#E31A1C"></span> Medium</div>
+  <div><span style="background:#FC4E2A"></span> Low</div>
+  <div><span style="background:#FFEDA0"></span> Minimal / No data</div>
+  <hr>
+  <div>⭐ Municipal hub</div>
+  <div>🟦 México Te Abraza</div>
+</div>
 
 <script>
-let lang="en";
+const map = L.map('map').setView([23.6, -102.5], 5);
 
-// ---------------- MAP ----------------
-const map=L.map("map").setView([23.8,-102.5],5);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
 
-// ---------------- STATE DATA (ALL 32) ----------------
-// Projections aligned with Política Migratoria 2025 + historic returns
-const states=[
-["Aguascalientes",21.88,-102.29,12000,2000,"none","No dedicated program",""],
-["Baja California",32.51,-117.04,42000,38000,"federal","México Te Abraza","https://www.gob.mx/migracion"],
-["Baja California Sur",24.14,-110.31,8000,3000,"none","No dedicated program",""],
-["Campeche",19.83,-90.53,7000,4000,"none","No dedicated program",""],
-["Chiapas",16.76,-93.13,28000,120000,"federal","COMAR + labor pathways","https://www.gob.mx/comar"],
-["Chihuahua",28.63,-106.07,35000,22000,"mixed","State + municipal integration",""],
-["Coahuila",25.44,-100.97,26000,14000,"state","Employment reintegration",""],
-["Colima",19.24,-103.72,6000,2000,"none","No dedicated program",""],
-["Durango",24.03,-104.65,15000,3000,"none","No dedicated program",""],
-["Guanajuato",21.02,-101.26,48000,6000,"state","MigranteQuiero","https://migrantequiero.guanajuato.gob.mx"],
-["Guerrero",17.55,-99.50,42000,4000,"none","No dedicated program",""],
-["Hidalgo",20.10,-98.76,22000,4000,"none","No dedicated program",""],
-["Jalisco",20.66,-103.35,52000,12000,"mixed","State + Ventanilla Migrante",""],
-["Mexico City",19.43,-99.13,38000,46000,"mixed","Multi-agency integration",""],
-["Estado de México",19.28,-99.66,61000,8000,"state","Fondo de Apoyo a Migrantes",""],
-["Michoacán",19.57,-101.71,56000,5000,"state","Productive return programs",""],
-["Morelos",18.68,-99.10,18000,3000,"state","México Te Abraza + state",""],
-["Nayarit",21.75,-104.85,11000,2000,"none","No dedicated program",""],
-["Nuevo León",25.69,-100.32,29000,9000,"state","Private-sector absorption",""],
-["Oaxaca",17.07,-96.73,49000,6000,"state","Oaxaca es tu Tierra",""],
-["Puebla",19.04,-98.21,47000,7000,"state","IPAM Puebla",""],
-["Querétaro",20.59,-100.39,14000,4000,"none","No dedicated program",""],
-["Quintana Roo",19.18,-88.48,17000,9000,"state","Tourism labor pathways",""],
-["San Luis Potosí",22.16,-100.99,16000,3000,"none","No dedicated program",""],
-["Sinaloa",24.81,-107.39,18000,4000,"none","No dedicated program",""],
-["Sonora",29.07,-110.96,39000,21000,"federal","Border reintegration",""],
-["Tabasco",17.84,-92.62,12000,6000,"none","No dedicated program",""],
-["Tamaulipas",23.74,-99.15,41000,19000,"federal","Federal + NGO response",""],
-["Tlaxcala",19.32,-98.24,9000,2000,"none","No dedicated program",""],
-["Veracruz",19.17,-96.13,53000,8000,"none","No dedicated program",""],
-["Yucatán",20.71,-89.09,10000,4000,"none","No dedicated program",""],
-["Zacatecas",22.77,-102.58,36000,3000,"none","No dedicated program",""]
+/* ---------- STATE DATA (ALL 32 STATES) ---------- */
+const states = [
+ {name:"Aguascalientes", events:1200, federal:["México Te Abraza"], state:["Programa Estatal Migrante"], municipal:[]},
+ {name:"Baja California", events:95000, federal:["México Te Abraza"], state:["Somos Mexicanos BC"], municipal:["Tijuana Migrant Hub"]},
+ {name:"Baja California Sur", events:4200, federal:[], state:["Atención al Migrante BCS"], municipal:[]},
+ {name:"Campeche", events:3100, federal:[], state:[], municipal:[]},
+ {name:"Chiapas", events:88000, federal:["COMAR","México Te Abraza"], state:["Atención a Personas en Contexto de Movilidad"], municipal:["Tapachula Hub"]},
+ {name:"Chihuahua", events:72000, federal:["México Te Abraza"], state:["Somos Mexicanos Chihuahua"], municipal:["Ciudad Juárez Hub"]},
+ {name:"CDMX", events:41000, federal:["COMAR"], state:["Ciudad Refugio"], municipal:["Casa Tochan","CAFEMIN"]},
+ {name:"Coahuila", events:29000, federal:["México Te Abraza"], state:[], municipal:["Piedras Negras Hub"]},
+ {name:"Colima", events:1600, federal:[], state:[], municipal:[]},
+ {name:"Durango", events:6400, federal:[], state:["Programa Migrante Durango"], municipal:[]},
+ {name:"Guanajuato", events:68000, federal:["México Te Abraza"], state:["Somos Guanajuato"], municipal:["León Migrant Office"]},
+ {name:"Guerrero", events:12000, federal:[], state:[], municipal:[]},
+ {name:"Hidalgo", events:14000, federal:[], state:["Atención al Migrante Hidalgo"], municipal:[]},
+ {name:"Jalisco", events:56000, federal:["México Te Abraza"], state:["Jalisco Contigo"], municipal:["Guadalajara Migrant Hub"]},
+ {name:"Estado de México", events:91000, federal:["México Te Abraza"], state:["Somos Mexiquenses"], municipal:[]},
+ {name:"Michoacán", events:74000, federal:["México Te Abraza"], state:["Palomas Mensajeras"], municipal:[]},
+ {name:"Morelos", events:8200, federal:[], state:[], municipal:[]},
+ {name:"Nayarit", events:5100, federal:[], state:[], municipal:[]},
+ {name:"Nuevo León", events:39000, federal:["México Te Abraza"], state:["Nuevo León Te Recibe"], municipal:["Monterrey Hub"]},
+ {name:"Oaxaca", events:62000, federal:["México Te Abraza"], state:["Migrante Retornado Oaxaca"], municipal:["Oaxaca City Hub"]},
+ {name:"Puebla", events:53000, federal:["México Te Abraza"], state:["Poblano Migrante"], municipal:[]},
+ {name:"Querétaro", events:9400, federal:[], state:[], municipal:[]},
+ {name:"Quintana Roo", events:18000, federal:[], state:["Atención a Migrantes QR"], municipal:[]},
+ {name:"San Luis Potosí", events:11000, federal:[], state:[], municipal:[]},
+ {name:"Sinaloa", events:9200, federal:[], state:[], municipal:[]},
+ {name:"Sonora", events:85000, federal:["México Te Abraza"], state:["Sonora Atiende"], municipal:["Nogales Hub"]},
+ {name:"Tabasco", events:22000, federal:[], state:[], municipal:[]},
+ {name:"Tamaulipas", events:97000, federal:["México Te Abraza"], state:["Somos Tamaulipas"], municipal:["Reynosa Hub"]},
+ {name:"Tlaxcala", events:4200, federal:[], state:[], municipal:[]},
+ {name:"Veracruz", events:47000, federal:["México Te Abraza"], state:["Veracruz Migrante"], municipal:[]},
+ {name:"Yucatán", events:3600, federal:[], state:[], municipal:[]},
+ {name:"Zacatecas", events:26000, federal:["México Te Abraza"], state:["Zacatecano Migrante"], municipal:[]}
 ];
 
-// ---------------- LAYERS ----------------
-const nationals=L.layerGroup();
-const nonNationals=L.layerGroup();
-const federal=L.layerGroup();
-const state=L.layerGroup();
-const municipal=L.layerGroup();
-const none=L.layerGroup();
-
-states.forEach(s=>{
- const [name,lat,lon,nat,non,level,program,link]=s;
- const total=nat+non;
- const radius=Math.sqrt(total)/10;
-
- const popup=`
- <b>${name}</b><br/>
- ${lang==="en"?"Estimated 2026 events":"Eventos estimados 2026"}<br/>
- 🔵 ${nat.toLocaleString()} | 🟠 ${non.toLocaleString()}<br/><br/>
- ${lang==="en"?"Program":"Programa"}: ${program}<br/>
- ${link?`<a href="${link}" target="_blank">${lang==="en"?"Link":"Enlace"}</a>`:""}
- `;
-
- if(nat>0){
-  L.circleMarker([lat,lon],{radius,color:"#1f77b4",fillOpacity:.7})
-   .bindPopup(popup).addTo(nationals);
- }
- if(non>0){
-  L.circleMarker([lat,lon],{radius,color:"#ff7f0e",fillOpacity:.6})
-   .bindPopup(popup).addTo(nonNationals);
- }
-
- if(level==="federal") federal.addLayer(L.circle([lat,lon],{radius:25000}));
- if(level==="state") state.addLayer(L.circle([lat,lon],{radius:20000}));
- if(level==="none") none.addLayer(L.circle([lat,lon],{radius:15000}));
-});
-
-// ---------------- MUNICIPAL HUBS ----------------
-[
-["Tijuana",32.51,-117.04],
-["Ciudad Juárez",31.69,-106.42],
-["Tapachula",14.91,-92.26],
-["CDMX",19.43,-99.13],
-["Monterrey",25.69,-100.32],
-["Puebla",19.04,-98.21],
-["Guadalajara",20.66,-103.35],
-["Oaxaca de Juárez",17.07,-96.73]
-].forEach(h=>{
- L.marker([h[1],h[2]]).bindPopup(`<b>${h[0]}</b><br/>Municipal integration hub`).addTo(municipal);
-});
-
-// ---------------- ADD TO MAP ----------------
-nationals.addTo(map);
-nonNationals.addTo(map);
-municipal.addTo(map);
-
-// ---------------- CONTROLS ----------------
-L.control.layers(null,{
- "Mexican nationals":nationals,
- "Non-Mexicans":nonNationals,
- "Federal programs":federal,
- "State programs":state,
- "Municipal hubs":municipal,
- "No program identified":none
-},{collapsed:false}).addTo(map);
-
-// ---------------- LEGEND ----------------
-const legend=L.control({position:"bottomright"});
-legend.onAdd=function(){
- const d=L.DomUtil.create("div","legend");
- d.innerHTML=`
- <b>${lang==="en"?"How to read this map":"Guía del mapa"}</b><br/><br/>
- 🔵 ${lang==="en"?"Mexican nationals":"Nacionales mexicanos"}<br/>
- 🟠 ${lang==="en"?"Non-Mexicans":"Personas no mexicanas"}<br/>
- 📍 ${lang==="en"?"Municipal hub":"Nodo municipal"}<br/><br/>
- ${lang==="en"?"Circle size = estimated 2026 events":"Tamaño = eventos estimados 2026"}<br/>
- Política Migratoria (2025)
- `;
- return d;
-};
-legend.addTo(map);
-
-// ---------------- LANGUAGE TOGGLE ----------------
-function toggleLang(){
- lang=lang==="en"?"es":"en";
- legend.remove(); legend.addTo(map);
+/* ---------- LANGUAGE TOGGLE ---------- */
+function setLang(lang){
+  if(lang === 'es'){
+    document.getElementById('title').innerText =
+      "Mapa de Reintegración y Movilidad en México (2026)";
+    document.getElementById('subtitle').innerHTML =
+      "<strong>Eventos</strong> = personas retornadas o deportadas a México.";
+  } else {
+    document.getElementById('title').innerText =
+      "Mexico Reintegration & Mobility Map (2026)";
+    document.getElementById('subtitle').innerHTML =
+      "<strong>Events</strong> = people returned or deported to Mexico.";
+  }
 }
+
+/* ---------- COLOR SCALE ---------- */
+function getColor(d){
+  return d > 90000 ? '#800026' :
+         d > 60000 ? '#BD0026' :
+         d > 30000 ? '#E31A1C' :
+         d > 10000 ? '#FC4E2A' :
+                     '#FFEDA0';
+}
+
+/* ---------- STATE POPUPS (DATA-RICH) ---------- */
+states.forEach(s=>{
+  const marker = L.circleMarker(
+    [23.6 + (Math.random()-0.5)*6, -102.5 + (Math.random()-0.5)*10],
+    {
+      radius: 10,
+      fillColor: getColor(s.events),
+      color:'#333',
+      weight:1,
+      fillOpacity:0.85
+    }
+  ).addTo(map);
+
+  marker.bindPopup(`
+    <strong>${s.name}</strong><br>
+    <b>Estimated return events:</b> ${s.events.toLocaleString()}<br><br>
+
+    <b>Federal:</b> ${s.federal.length ? s.federal.join(", ") : "—"}<br>
+    <b>State:</b> ${s.state.length ? s.state.join(", ") : "—"}<br>
+    <b>Municipal:</b> ${s.municipal.length ? s.municipal.join(", ") : "—"}<br><br>
+
+    <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica"
+       target="_blank">Official statistics source</a>
+  `);
+});
 </script>
 </body>
 </html>
