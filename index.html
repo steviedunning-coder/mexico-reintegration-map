@@ -1,124 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Mexico Reintegration Map</title>
+<meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<title>Mexico Reintegration Map</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+ integrity="sha256-sA+4JDf4wqSMPWz6jBq9Q3r7xv2GXj2e1Uj4yV4hC7k=" crossorigin=""/>
 <style>
-  #map { height: 100vh; }
-  .legend {
-    background: white;
-    line-height: 1.5em;
-    padding: 10px;
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    z-index: 1000;
-    border: 1px solid #ccc;
-  }
-  .toggle-btn {
-    background:white; padding:5px; border:1px solid #ccc; cursor:pointer;
-  }
+  #map { height: 95vh; width: 100%; }
+  .legend { background: white; padding: 10px; line-height: 1.5; }
 </style>
 </head>
 <body>
 
+<h2>Mexico Reintegration Map</h2>
 <div id="map"></div>
-<div class="legend">
-  <b>Legend:</b><br>
-  Click a state marker to view reintegration programs and returned migrant data.<br>
-  Orange icon: México te Abraza federal hub.<br>
-  Data source: <a href="https://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/Boletines_Estadisticos" target="_blank">Boletín Estadístico Mensual de Estadísticas Migratorias 2025</a>
+<div class="legend" id="legend">
+  <strong>Legend:</strong><br>
+  🔵 State Marker (click for info)<br>
+  🟢 México te Abraza hub<br>
+  <br>
+  Data source: <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica" target="_blank">Boletín Estadístico de Migración, Unidad de Política Migratoria, SEGOB, 2025</a>
 </div>
+<button onclick="toggleLanguage()">Toggle EN/ES</button>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+ integrity="sha256-oM2Q5iV+pJHzmua4eM+Px8Gpry6D+8K7FZfXuoU5rPo=" crossorigin=""></script>
+
 <script>
+// Language toggle
+let currentLang = 'en';
+function toggleLanguage() {
+    currentLang = currentLang === 'en' ? 'es' : 'en';
+    for (let key in markers) {
+        markers[key].bindPopup(getPopupContent(key));
+    }
+}
 
-// Initialize map
-var map = L.map('map').setView([23.6345, -102.5528], 5);
+// Map initialization
+const map = L.map('map').setView([23, -102], 5); // center Mexico
 
-// Tiles
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// México te Abraza icon
-var teAbrazaIcon = L.icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
-    iconSize: [32, 32]
-});
-
-// State data: all 32 states
-var states = {
-"Aguascalientes": {lat:21.8853, lon:-102.292, en:"No state reintegration program identified (2025). Federal options available.", es:"No se identifica programa estatal de reintegración (2025). Opciones federales disponibles.", link:"https://www.gob.mx/bienestar", returned2025:1585, returned2026:1600},
-"Baja California": {lat:32.5149, lon:-117.038, teAbraza:true, en:"Federal programs support returned migrants.", es:"Programas federales apoyan a migrantes retornados.", link:"https://www.gob.mx/bienestar", returned2025:3025, returned2026:3150},
-"Baja California Sur": {lat:24.1426, lon:-110.313, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:144, returned2026:150},
-"Campeche": {lat:19.8301, lon:-90.5349, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:432, returned2026:440},
-"Chiapas": {lat:16.7569, lon:-93.1292, en:"Refugee & migrant stabilization, municipal hubs active.", es:"Estabilización de refugiados y migrantes, hubs municipales activos.", link:"https://www.gob.mx/bienestar", returned2025:11640, returned2026:12000},
-"Chihuahua": {lat:28.632, lon:-106.069, teAbraza:true, en:"Federal + municipal shelters support integration of returned migrants.", es:"Refugios federales + municipales apoyan la integración de migrantes retornados.", link:"https://www.gob.mx/bienestar", returned2025:5156, returned2026:5300},
-"Coahuila": {lat:25.438, lon:-100.974, teAbraza:true, en:"Federal employment linkage programs.", es:"Programas federales de vinculación laboral.", link:"https://www.gob.mx/bienestar", returned2025:2017, returned2026:2100},
-"Colima": {lat:19.2433, lon:-103.725, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:576, returned2026:580},
-"Durango": {lat:24.0277, lon:-104.653, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:2305, returned2026:2350},
-"Guanajuato": {lat:21.019, lon:-101.257, en:"MIGRANTEQUIERO state reintegration program active.", es:"Programa estatal MIGRANTEQUIERO activo.", link:"https://migrantequiero.guanajuato.gob.mx", returned2025:9790, returned2026:10000},
-"Guerrero": {lat:17.5515, lon:-99.5006, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:14280, returned2026:14500},
-"Hidalgo": {lat:20.1011, lon:-98.7624, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:3747, returned2026:3800},
-"Jalisco": {lat:20.6597, lon:-103.35, en:"Fondo de Apoyo a Migrantes; employment integration programs.", es:"Fondo de Apoyo a Migrantes; programas de integración laboral.", link:"https://www.jalisco.gob.mx", returned2025:6040, returned2026:6200},
-"Mexico City": {lat:19.4326, lon:-99.1332, en:"Multi-agency integration services.", es:"Servicios de integración multi-agencia.", link:"https://www.cdmx.gob.mx", returned2025:3169, returned2026:3300},
-"Estado de México": {lat:19.2826, lon:-99.6557, en:"Fondo de Apoyo a Migrantes.", es:"Fondo de Apoyo a Migrantes.", link:"https://www.edomex.gob.mx", returned2025:7205, returned2026:7400},
-"Michoacán": {lat:19.5665, lon:-101.707, en:"Pilot productive return programs active.", es:"Programas piloto de retorno productivo activos.", link:"https://www.gob.mx/bienestar", returned2025:11380, returned2026:11600},
-"Morelos": {lat:18.6813, lon:-99.1013, en:"Morelos te Abraza.", es:"Morelos te Abraza.", link:"https://www.morelos.gob.mx", returned2025:1873, returned2026:1900},
-"Nayarit": {lat:21.7514, lon:-104.846, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:2017, returned2026:2050},
-"Nuevo León": {lat:25.6866, lon:-100.316, teAbraza:true, en:"Employment-focused reintegration.", es:"Reintegración enfocada al empleo.", link:"https://www.nl.gob.mx", returned2025:1152, returned2026:1200},
-"Oaxaca": {lat:17.0732, lon:-96.7266, en:"Oaxaca es tu Tierra program active.", es:"Programa Oaxaca es tu Tierra activo.", link:"https://www.gob.mx/bienestar", returned2025:12530, returned2026:12700},
-"Puebla": {lat:19.0414, lon:-98.2063, en:"IPAM Puebla state program active.", es:"Programa estatal IPAM Puebla activo.", link:"https://www.gob.mx/bienestar", returned2025:9492, returned2026:9700},
-"Querétaro": {lat:20.5888, lon:-100.39, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:2297, returned2026:2300},
-"Quintana Roo": {lat:19.1817, lon:-88.4791, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:288, returned2026:300},
-"San Luis Potosí": {lat:22.1565, lon:-100.986, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:3747, returned2026:3800},
-"Sinaloa": {lat:24.8091, lon:-107.394, teAbraza:true, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:5762, returned2026:5900},
-"Sonora": {lat:29.0729, lon:-110.956, teAbraza:true, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:3314, returned2026:3400},
-"Tabasco": {lat:17.8409, lon:-92.6189, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:1152, returned2026:1200},
-"Tamaulipas": {lat:23.7417, lon:-99.1459, teAbraza:true, en:"Federal + humanitarian programs.", es:"Programas federales + humanitarios.", link:"https://www.gob.mx/bienestar", returned2025:4754, returned2026:4900},
-"Tlaxcala": {lat:19.3182, lon:-98.2375, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:720, returned2026:750},
-"Veracruz": {lat:19.1738, lon:-96.1342, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:9642, returned2026:9800},
-"Yucatán": {lat:20.7099, lon:-89.0943, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:288, returned2026:300},
-"Zacatecas": {lat:22.7709, lon:-102.583, en:"No state reintegration program identified (2025).", es:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returned2025:3169, returned2026:3300}
+// State data
+const stateData = {
+"Aguascalientes": {en:{desc:"No state-level reintegration program identified (2025). Federal options available.", link:"https://www.gob.mx/bienestar", returnees:1585, est2026:1600}, es:{desc:"No se identifica programa estatal de reintegración (2025). Opciones federales disponibles.", link:"https://www.gob.mx/bienestar", returnees:1585, est2026:1600}},
+"Baja California": {en:{desc:"Federal and NGO programs support returned migrants.", link:"https://www.gob.mx/bienestar", returnees:3025, est2026:3100}, es:{desc:"Programas federales y ONG apoyan a migrantes retornados.", link:"https://www.gob.mx/bienestar", returnees:3025, est2026:3100}},
+"Baja California Sur": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:145, est2026:150}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:145, est2026:150}},
+"Campeche": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:432, est2026:440}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:432, est2026:440}},
+"Chiapas": {en:{desc:"Refugee & migrant stabilization, municipal hubs active.", link:"https://www.gob.mx/bienestar", returnees:1160, est2026:1200}, es:{desc:"Estabilización de refugiados y migrantes, hubs municipales activos.", link:"https://www.gob.mx/bienestar", returnees:1160, est2026:1200}},
+"Chihuahua": {en:{desc:"Federal + municipal shelters support integration of returned migrants.", link:"https://www.gob.mx/bienestar", returnees:5180, est2026:5300}, es:{desc:"Refugios federales + municipales apoyan la integración de migrantes retornados.", link:"https://www.gob.mx/bienestar", returnees:5180, est2026:5300}},
+"Coahuila": {en:{desc:"Federal employment linkage programs.", link:"https://www.gob.mx/bienestar", returnees:2017, est2026:2050}, es:{desc:"Programas federales de vinculación laboral.", link:"https://www.gob.mx/bienestar", returnees:2017, est2026:2050}},
+"Colima": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:576, est2026:600}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:576, est2026:600}},
+"Durango": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2305, est2026:2350}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:2305, est2026:2350}},
+"Guanajuato": {en:{desc:"MIGRANTEQUIERO state reintegration program active.", link:"https://migrantequiero.guanajuato.gob.mx", returnees:9780, est2026:10000}, es:{desc:"Programa estatal MIGRANTEQUIERO activo.", link:"https://migrantequiero.guanajuato.gob.mx", returnees:9780, est2026:10000}},
+"Guerrero": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:14260, est2026:14500}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:14260, est2026:14500}},
+"Hidalgo": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3736, est2026:3800}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:3736, est2026:3800}},
+"Jalisco": {en:{desc:"Fondo de Apoyo a Migrantes.", link:"https://www.jalisco.gob.mx", returnees:6040, est2026:6200}, es:{desc:"Fondo de Apoyo a Migrantes.", link:"https://www.jalisco.gob.mx", returnees:6040, est2026:6200}},
+"Mexico City": {en:{desc:"Multi-agency integration services.", link:"https://www.cdmx.gob.mx", returnees:3169, est2026:3250}, es:{desc:"Servicios de integración multi-agencia.", link:"https://www.cdmx.gob.mx", returnees:3169, est2026:3250}},
+"Estado de México": {en:{desc:"Fondo de Apoyo a Migrantes.", link:"https://www.edomex.gob.mx", returnees:7203, est2026:7400}, es:{desc:"Fondo de Apoyo a Migrantes.", link:"https://www.edomex.gob.mx", returnees:7203, est2026:7400}},
+"Michoacán": {en:{desc:"Pilot productive return programs active.", link:"https://www.gob.mx/bienestar", returnees:11388, est2026:11500}, es:{desc:"Programas piloto de retorno productivo activos.", link:"https://www.gob.mx/bienestar", returnees:11388, est2026:11500}},
+"Morelos": {en:{desc:"Morelos te Abraza.", link:"https://www.morelos.gob.mx", returnees:1873, est2026:1900}, es:{desc:"Morelos te Abraza.", link:"https://www.morelos.gob.mx", returnees:1873, est2026:1900}},
+"Nayarit": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2016, est2026:2050}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:2016, est2026:2050}},
+"Nuevo León": {en:{desc:"Employment-focused reintegration.", link:"https://www.nl.gob.mx", returnees:1152, est2026:1200}, es:{desc:"Reintegración enfocada al empleo.", link:"https://www.nl.gob.mx", returnees:1152, est2026:1200}},
+"Oaxaca": {en:{desc:"Oaxaca es tu Tierra program active.", link:"https://www.gob.mx/bienestar", returnees:12526, est2026:12700}, es:{desc:"Programa Oaxaca es tu Tierra activo.", link:"https://www.gob.mx/bienestar", returnees:12526, est2026:12700}},
+"Puebla": {en:{desc:"IPAM Puebla state program active.", link:"https://www.gob.mx/bienestar", returnees:9495, est2026:9700}, es:{desc:"Programa estatal IPAM Puebla activo.", link:"https://www.gob.mx/bienestar", returnees:9495, est2026:9700}},
+"Querétaro": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2305, est2026:2350}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:2305, est2026:2350}},
+"Quintana Roo": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:289, est2026:300}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:289, est2026:300}},
+"San Luis Potosí": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3747, est2026:3800}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:3747, est2026:3800}},
+"Sinaloa": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:5775, est2026:5900}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:5775, est2026:5900}},
+"Sonora": {en:{desc:"Federal programs support returned migrants.", link:"https://www.gob.mx/bienestar", returnees:3313, est2026:3400}, es:{desc:"Programas federales apoyan a migrantes retornados.", link:"https://www.gob.mx/bienestar", returnees:3313, est2026:3400}},
+"Tabasco": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:1152, est2026:1200}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:1152, est2026:1200}},
+"Tamaulipas": {en:{desc:"Federal programs + México te Abraza hub.", link:"https://www.gob.mx/bienestar", returnees:4750, est2026:4900}, es:{desc:"Programas federales + México te Abraza hub.", link:"https://www.gob.mx/bienestar", returnees:4750, est2026:4900}},
+"Tlaxcala": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:720, est2026:750}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:720, est2026:750}},
+"Veracruz": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:9643, est2026:9800}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:9643, est2026:9800}},
+"Yucatán": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:289, est2026:300}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:289, est2026:300}},
+"Zacatecas": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3169, est2026:3250}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:3169, est2026:3250}}
 };
 
-// Language toggle
-var lang = 'en';
+// State centroids (approx.)
+const stateCentroids = {
+"Aguascalientes":[21.8853, -102.292],
+"Baja California":[32.5149, -117.038],
+"Baja California Sur":[24.1426, -110.313],
+"Campeche":[19.8301, -90.5349],
+"Chiapas":[16.7569, -93.1292],
+"Chihuahua":[28.632, -106.069],
+"Coahuila":[25.438, -100.974],
+"Colima":[19.2433, -103.725],
+"Durango":[24.0277, -104.653],
+"Guanajuato":[21.019, -101.257],
+"Guerrero":[17.5515, -99.5006],
+"Hidalgo":[20.1011, -98.7624],
+"Jalisco":[20.6597, -103.35],
+"Mexico City":[19.4326, -99.1332],
+"Estado de México":[19.2826, -99.6557],
+"Michoacán":[19.5665, -101.707],
+"Morelos":[18.6813, -99.1013],
+"Nayarit":[21.7514, -104.846],
+"Nuevo León":[25.6866, -100.316],
+"Oaxaca":[17.0732, -96.7266],
+"Puebla":[19.0414, -98.2063],
+"Querétaro":[20.5888, -100.39],
+"Quintana Roo":[19.1817, -88.4791],
+"San Luis Potosí":[22.1565, -100.986],
+"Sinaloa":[24.8091, -107.394],
+"Sonora":[29.0729, -110.956],
+"Tabasco":[17.8409, -92.6189],
+"Tamaulipas":[23.7417, -99.1459],
+"Tlaxcala":[19.3182, -98.2375],
+"Veracruz":[19.1738, -96.1342],
+"Yucatán":[20.7099, -89.0943],
+"Zacatecas":[22.7709, -102.583]
+};
 
 // Add markers
-for(var s in states){
-    (function(s){
-        var st = states[s];
-        var marker = L.marker([st.lat, st.lon], {icon: st.teAbraza ? teAbrazaIcon : undefined}).addTo(map);
-        marker.bindPopup(function(){
-            return "<b>"+s+"</b><br>" + 
-                   (lang==='en'?st.en:st.es)+"<br>" +
-                   '<a href="'+st.link+'" target="_blank">Program link</a><br>' +
-                   "Returned 2025: "+st.returned2025+"<br>" +
-                   "Estimated 2026: "+st.returned2026;
-        });
-    })(s);
+const markers = {};
+for (let state in stateData) {
+    const latlng = stateCentroids[state];
+    let icon = L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/252/252025.png', iconSize:[25,25]});
+    // México te Abraza states
+    const teAbrazaStates = ["Baja California","Sonora","Chihuahua","Coahuila","Nuevo León","Tamaulipas"];
+    if (teAbrazaStates.includes(state)) {
+        icon = L.icon({iconUrl:'https://cdn-icons-png.flaticon.com/512/190/190411.png', iconSize:[25,25]});
+    }
+    const marker = L.marker(latlng, {icon: icon}).addTo(map);
+    marker.bindPopup(getPopupContent(state));
+    markers[state] = marker;
 }
 
-// Toggle button
-var toggleBtn = L.control({position:'topright'});
-toggleBtn.onAdd = function(){
-    var div = L.DomUtil.create('div','toggle-btn');
-    div.innerHTML = '<button onclick="toggleLanguage()">EN/ES</button>';
-    return div;
-};
-toggleBtn.addTo(map);
-
-function toggleLanguage(){
-    lang = (lang==='en'?'es':'en');
-    map.eachLayer(function(layer){
-        if(layer.getPopup) layer.closePopup();
-    });
+// Popup content function
+function getPopupContent(state) {
+    const data = stateData[state][currentLang];
+    return `<strong>${state}</strong><br>
+    ${data.desc}<br>
+    2025 returned: ${data.returnees}<br>
+    2026 estimated: ${data.est2026}<br>
+    <a href="${data.link}" target="_blank">Program Link</a>`;
 }
-
 </script>
 </body>
 </html>
