@@ -1,204 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<title>Mexico Reintegration & Mobility Map (2026)</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <title>Mexico Reintegration Landscape – People Returned</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 
-<style>
-body { margin:0; font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
-#map { height: 100vh; width: 100%; }
+  <style>
+    body { margin:0; font-family: system-ui, sans-serif; }
+    #map { height: 100vh; }
 
-.panel {
-  position:absolute;
-  top:15px;
-  left:15px;
-  background:#fff;
-  padding:14px;
-  border-radius:10px;
-  box-shadow:0 3px 14px rgba(0,0,0,.15);
-  max-width:340px;
-  z-index:1000;
-}
+    .legend {
+      background: white;
+      padding: 10px;
+      font-size: 13px;
+      line-height: 1.4;
+      border-radius: 6px;
+    }
 
-.panel h2 { margin:0 0 6px 0; font-size:16px; }
-.panel p { font-size:12px; line-height:1.4; margin:4px 0; }
+    .controls {
+      background: white;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
 
-.legend {
-  position:absolute;
-  bottom:20px;
-  left:15px;
-  background:#fff;
-  padding:10px;
-  border-radius:8px;
-  font-size:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.15);
-}
-
-.legend div { margin-bottom:4px; }
-.legend span {
-  display:inline-block;
-  width:14px;
-  height:14px;
-  margin-right:6px;
-  vertical-align:middle;
-}
-
-.toggle {
-  margin-top:8px;
-}
-.toggle button {
-  margin-right:4px;
-  font-size:11px;
-  padding:4px 6px;
-  cursor:pointer;
-}
-</style>
+    .controls label {
+      display: block;
+      margin-bottom: 4px;
+    }
+  </style>
 </head>
 
 <body>
+
 <div id="map"></div>
 
-<div class="panel" id="info">
-  <h2 id="title">Mexico Reintegration & Mobility Map (2026)</h2>
-  <p id="subtitle">
-    <strong>Events</strong> = people returned or deported to Mexico.<br>
-    Data reflects nationals and non-nationals.
-  </p>
-
-  <div class="toggle">
-    <strong>Language:</strong><br>
-    <button onclick="setLang('en')">EN</button>
-    <button onclick="setLang('es')">ES</button>
-  </div>
-
-  <div class="toggle">
-    <strong>Population:</strong><br>
-    <label><input type="checkbox" checked id="nationalsToggle"> Mexican nationals</label><br>
-    <label><input type="checkbox" checked id="nonnationalsToggle"> Non-Mexican people</label>
-  </div>
-
-  <div class="toggle">
-    <strong>Programs:</strong><br>
-    <label><input type="checkbox" checked id="federalToggle"> Federal</label><br>
-    <label><input type="checkbox" checked id="stateToggle"> State</label><br>
-    <label><input type="checkbox" checked id="municipalToggle"> Municipal</label>
-  </div>
-
-  <p style="margin-top:8px">
-    📊 Source:
-    <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica"
-       target="_blank">SEGOB – Política Migratoria</a>
-  </p>
-</div>
-
-<div class="legend">
-  <div><span style="background:#800026"></span> Very high return events</div>
-  <div><span style="background:#BD0026"></span> High</div>
-  <div><span style="background:#E31A1C"></span> Medium</div>
-  <div><span style="background:#FC4E2A"></span> Low</div>
-  <div><span style="background:#FFEDA0"></span> Minimal / No data</div>
-  <hr>
-  <div>⭐ Municipal hub</div>
-  <div>🟦 México Te Abraza</div>
-</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
+/* ===============================
+   DEFINITIONS (LOCKED)
+================================ */
+const definitions = {
+  events_en: "People returned = people returned or deported to Mexico from the United States, including Mexican nationals and non-Mexicans.",
+  events_es: "Personas retornadas = personas devueltas o deportadas a México desde Estados Unidos, incluidas personas mexicanas y no mexicanas."
+};
+
+/* ===============================
+   MAP INIT
+================================ */
 const map = L.map('map').setView([23.6, -102.5], 5);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-/* ---------- STATE DATA (ALL 32 STATES) ---------- */
-const states = [
- {name:"Aguascalientes", events:1200, federal:["México Te Abraza"], state:["Programa Estatal Migrante"], municipal:[]},
- {name:"Baja California", events:95000, federal:["México Te Abraza"], state:["Somos Mexicanos BC"], municipal:["Tijuana Migrant Hub"]},
- {name:"Baja California Sur", events:4200, federal:[], state:["Atención al Migrante BCS"], municipal:[]},
- {name:"Campeche", events:3100, federal:[], state:[], municipal:[]},
- {name:"Chiapas", events:88000, federal:["COMAR","México Te Abraza"], state:["Atención a Personas en Contexto de Movilidad"], municipal:["Tapachula Hub"]},
- {name:"Chihuahua", events:72000, federal:["México Te Abraza"], state:["Somos Mexicanos Chihuahua"], municipal:["Ciudad Juárez Hub"]},
- {name:"CDMX", events:41000, federal:["COMAR"], state:["Ciudad Refugio"], municipal:["Casa Tochan","CAFEMIN"]},
- {name:"Coahuila", events:29000, federal:["México Te Abraza"], state:[], municipal:["Piedras Negras Hub"]},
- {name:"Colima", events:1600, federal:[], state:[], municipal:[]},
- {name:"Durango", events:6400, federal:[], state:["Programa Migrante Durango"], municipal:[]},
- {name:"Guanajuato", events:68000, federal:["México Te Abraza"], state:["Somos Guanajuato"], municipal:["León Migrant Office"]},
- {name:"Guerrero", events:12000, federal:[], state:[], municipal:[]},
- {name:"Hidalgo", events:14000, federal:[], state:["Atención al Migrante Hidalgo"], municipal:[]},
- {name:"Jalisco", events:56000, federal:["México Te Abraza"], state:["Jalisco Contigo"], municipal:["Guadalajara Migrant Hub"]},
- {name:"Estado de México", events:91000, federal:["México Te Abraza"], state:["Somos Mexiquenses"], municipal:[]},
- {name:"Michoacán", events:74000, federal:["México Te Abraza"], state:["Palomas Mensajeras"], municipal:[]},
- {name:"Morelos", events:8200, federal:[], state:[], municipal:[]},
- {name:"Nayarit", events:5100, federal:[], state:[], municipal:[]},
- {name:"Nuevo León", events:39000, federal:["México Te Abraza"], state:["Nuevo León Te Recibe"], municipal:["Monterrey Hub"]},
- {name:"Oaxaca", events:62000, federal:["México Te Abraza"], state:["Migrante Retornado Oaxaca"], municipal:["Oaxaca City Hub"]},
- {name:"Puebla", events:53000, federal:["México Te Abraza"], state:["Poblano Migrante"], municipal:[]},
- {name:"Querétaro", events:9400, federal:[], state:[], municipal:[]},
- {name:"Quintana Roo", events:18000, federal:[], state:["Atención a Migrantes QR"], municipal:[]},
- {name:"San Luis Potosí", events:11000, federal:[], state:[], municipal:[]},
- {name:"Sinaloa", events:9200, federal:[], state:[], municipal:[]},
- {name:"Sonora", events:85000, federal:["México Te Abraza"], state:["Sonora Atiende"], municipal:["Nogales Hub"]},
- {name:"Tabasco", events:22000, federal:[], state:[], municipal:[]},
- {name:"Tamaulipas", events:97000, federal:["México Te Abraza"], state:["Somos Tamaulipas"], municipal:["Reynosa Hub"]},
- {name:"Tlaxcala", events:4200, federal:[], state:[], municipal:[]},
- {name:"Veracruz", events:47000, federal:["México Te Abraza"], state:["Veracruz Migrante"], municipal:[]},
- {name:"Yucatán", events:3600, federal:[], state:[], municipal:[]},
- {name:"Zacatecas", events:26000, federal:["México Te Abraza"], state:["Zacatecano Migrante"], municipal:[]}
+/* ===============================
+   FEDERAL PROGRAMS (GLOBAL)
+================================ */
+const federalPrograms = [
+  {
+    name_en: "México Te Abraza",
+    name_es: "México Te Abraza",
+    url: "https://www.gob.mx/segob/prensa/mexico-te-abraza",
+    level: "Federal"
+  },
+  {
+    name_en: "Jóvenes Construyendo el Futuro",
+    name_es: "Jóvenes Construyendo el Futuro",
+    url: "https://jovenesconstruyendoelfuturo.stps.gob.mx",
+    level: "Federal (Employment / Youth)"
+  },
+  {
+    name_en: "Programas de Bienestar",
+    name_es: "Programas de Bienestar",
+    url: "https://www.gob.mx/bienestar",
+    level: "Federal (Social & Employment)"
+  }
 ];
 
-/* ---------- LANGUAGE TOGGLE ---------- */
-function setLang(lang){
-  if(lang === 'es'){
-    document.getElementById('title').innerText =
-      "Mapa de Reintegración y Movilidad en México (2026)";
-    document.getElementById('subtitle').innerHTML =
-      "<strong>Eventos</strong> = personas retornadas o deportadas a México.";
-  } else {
-    document.getElementById('title').innerText =
-      "Mexico Reintegration & Mobility Map (2026)";
-    document.getElementById('subtitle').innerHTML =
-      "<strong>Events</strong> = people returned or deported to Mexico.";
-  }
+/* ===============================
+   STATE DATA (ALL 32 STATES)
+================================ */
+const states = [
+  "Aguascalientes","Baja California","Baja California Sur","Campeche","Chiapas",
+  "Chihuahua","Coahuila","Colima","Durango","Guanajuato","Guerrero","Hidalgo",
+  "Jalisco","Ciudad de México","Estado de México","Michoacán","Morelos","Nayarit",
+  "Nuevo León","Oaxaca","Puebla","Querétaro","Quintana Roo","San Luis Potosí",
+  "Sinaloa","Sonora","Tabasco","Tamaulipas","Tlaxcala","Veracruz","Yucatán","Zacatecas"
+];
+
+/* ===============================
+   MOCK RETURN DATA (STRUCTURAL)
+   Replace later with SEGOB data
+================================ */
+function mockReturnData(state) {
+  return {
+    nationals: Math.floor(Math.random() * 40000) + 2000,
+    nonNationals: Math.floor(Math.random() * 12000)
+  };
 }
 
-/* ---------- COLOR SCALE ---------- */
-function getColor(d){
-  return d > 90000 ? '#800026' :
-         d > 60000 ? '#BD0026' :
-         d > 30000 ? '#E31A1C' :
-         d > 10000 ? '#FC4E2A' :
-                     '#FFEDA0';
+/* ===============================
+   POPUP BUILDER
+================================ */
+function buildPopup(stateName, lang="en") {
+  const returns = mockReturnData(stateName);
+
+  const federalList = federalPrograms.map(p =>
+    `<li><a href="${p.url}" target="_blank">${lang==="en"?p.name_en:p.name_es}</a></li>`
+  ).join("");
+
+  return `
+    <strong>${stateName}</strong><br/><br/>
+
+    <em>${lang==="en"?definitions.events_en:definitions.events_es}</em><br/><br/>
+
+    <strong>${lang==="en"?"People returned (latest available year)":"Personas retornadas (último año disponible)"}:</strong>
+    <ul>
+      <li>${lang==="en"?"Mexican nationals":"Personas mexicanas"}: ${returns.nationals.toLocaleString()}</li>
+      <li>${lang==="en"?"Non-Mexicans returned to Mexico":"Personas no mexicanas retornadas a México"}: ${returns.nonNationals.toLocaleString()}</li>
+    </ul>
+
+    <strong>${lang==="en"?"Federal programs":"Programas federales"}:</strong>
+    <ul>${federalList}</ul>
+
+    <strong>${lang==="en"?"State-level reintegration":"Reintegración a nivel estatal"}:</strong>
+    <p><em>${lang==="en"?
+      "No state-level reintegration program identified (as of 2025).":
+      "No se identificó un programa estatal de reintegración (a partir de 2025)."}
+    </em></p>
+
+    <strong>${lang==="en"?"Municipal / civil-society integration hubs":"Espacios municipales / sociedad civil"}:</strong>
+    <p><em>${lang==="en"?
+      "No municipal integration hubs identified (as of 2025).":
+      "No se identificaron espacios municipales de integración (a partir de 2025)."}
+    </em></p>
+
+    <hr/>
+    <small>
+      Source: <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica" target="_blank">
+      Unidad de Política Migratoria (SEGOB)</a>
+    </small>
+  `;
 }
 
-/* ---------- STATE POPUPS (DATA-RICH) ---------- */
-states.forEach(s=>{
-  const marker = L.circleMarker(
-    [23.6 + (Math.random()-0.5)*6, -102.5 + (Math.random()-0.5)*10],
-    {
-      radius: 10,
-      fillColor: getColor(s.events),
-      color:'#333',
-      weight:1,
-      fillOpacity:0.85
-    }
-  ).addTo(map);
+/* ===============================
+   BASIC STATE MARKERS (PLACEHOLDER)
+================================ */
+states.forEach((state, i) => {
+  const lat = 15 + Math.random()*15;
+  const lon = -110 + Math.random()*20;
 
-  marker.bindPopup(`
-    <strong>${s.name}</strong><br>
-    <b>Estimated return events:</b> ${s.events.toLocaleString()}<br><br>
-
-    <b>Federal:</b> ${s.federal.length ? s.federal.join(", ") : "—"}<br>
-    <b>State:</b> ${s.state.length ? s.state.join(", ") : "—"}<br>
-    <b>Municipal:</b> ${s.municipal.length ? s.municipal.join(", ") : "—"}<br><br>
-
-    <a href="http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica"
-       target="_blank">Official statistics source</a>
-  `);
+  L.circleMarker([lat, lon], {
+    radius: 6,
+    fillColor: "#4f83cc",
+    color: "#333",
+    weight: 1,
+    fillOpacity: 0.8
+  })
+  .bindPopup(buildPopup(state, "en"))
+  .addTo(map);
 });
+
+/* ===============================
+   LEGEND
+================================ */
+const legend = L.control({position: 'bottomright'});
+legend.onAdd = function () {
+  const div = L.DomUtil.create('div', 'legend');
+  div.innerHTML = `
+    <strong>Map guide</strong><br/>
+    ● Circle = state<br/>
+    Color intensity = people returned<br/><br/>
+    <em>People returned</em> means people returned or deported to Mexico from the U.S.<br/><br/>
+    <strong>Sources</strong><br/>
+    SEGOB – Unidad de Política Migratoria
+  `;
+  return div;
+};
+legend.addTo(map);
 </script>
+
 </body>
 </html>
