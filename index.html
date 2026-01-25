@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mexico Reintegration Map 2026</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css" />
-  <style>
-    body, html { margin:0; padding:0; height:100%; font-family: sans-serif; }
-    #map { width: 70%; height: 100%; float: left; }
-    #panel { width: 30%; height:100%; float:left; padding:1rem; overflow-y:auto; border-left:1px solid #ddd; }
-    #panel h2 { margin-top:0; }
-    .toggle { margin-bottom:1rem; }
-    .citation { margin-top:2rem; padding-top:1rem; border-top:1px solid #ccc; font-size:0.9em; color:#555; }
-    a { color:#1a5fb4; }
-  </style>
+<meta charset="UTF-8">
+<title>Mexico Reintegration Map 2026</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.5/dist/leaflet.css" />
+<style>
+  html, body { height: 100%; margin:0; font-family: sans-serif; }
+  #map { width: 70%; height: 100%; float: left; }
+  #panel { width: 30%; height: 100%; float: left; padding: 1rem; overflow-y: auto; border-left: 1px solid #ddd; }
+  #panel h2 { margin-top: 0; }
+  .toggle { margin-bottom: 1rem; }
+  .citation { margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #ccc; font-size: 0.9em; color: #555; }
+  a { color: #1a5fb4; text-decoration: none; }
+</style>
 </head>
 <body>
 
@@ -31,80 +31,64 @@
 
 <script src="https://unpkg.com/leaflet@1.9.5/dist/leaflet.js"></script>
 <script>
-// --- Initialize map ---
+// ---------------- Map Initialization ----------------
 const map = L.map('map').setView([23, -102], 5);
-
-// Add a basemap
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// --- Language toggle ---
+// ---------------- Language Toggle ----------------
 let lang = 'en';
 function setLang(l) {
   lang = l;
   document.getElementById("citation").innerText = citationText[lang];
 }
-
-// --- Citation ---
 const citationText = {
-  en: "Sources: INEGI, Secretaría de Gobernación / Política Migratoria, state government portals, civil society reports.",
+  en: "Sources: INEGI, Secretaría de Gobernación / Política Migratoria, state portals, civil society reports.",
   es: "Fuentes: INEGI, Secretaría de Gobernación / Política Migratoria, portales estatales, reportes de la sociedad civil."
 };
 setLang('en');
 
-// --- State data ---
+// ---------------- State Data ----------------
 const stateData = {
-  "Aguascalientes": {
-    en: {name:"Aguascalientes", desc:"No state-level reintegration program identified (2025). Federal options available.", link:"https://www.gob.mx/bienestar"},
-    es: {name:"Aguascalientes", desc:"No se identifica programa estatal de reintegración (2025). Opciones federales disponibles.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Baja California": {
-    en: {name:"Baja California", desc:"Federal and NGO programs support returned migrants. High number of people returned in 2025.", link:"https://www.gob.mx/bienestar"},
-    es: {name:"Baja California", desc:"Programas federales y ONG apoyan a migrantes retornados. Alto número de personas retornadas en 2025.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Chiapas": {
-    en: {name:"Chiapas", desc:"Refugee & migrant stabilization, including Oaxaca-Mexico corridor programs. Municipal hubs active.", link:"https://www.gob.mx/bienestar"},
-    es: {name:"Chiapas", desc:"Estabilización de refugiados y migrantes, incluyendo programas del corredor Oaxaca-México. Hubs municipales activos.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Guanajuato": {
-    en: {name:"Guanajuato", desc:"MIGRANTEQUIERO state reintegration program active. Estimated 2026 returned migrants: 1,500.", link:"https://migrantequiero.guanajuato.gob.mx"},
-    es: {name:"Guanajuato", desc:"Programa estatal MIGRANTEQUIERO activo. Migrantes retornados estimados 2026: 1,500.", link:"https://migrantequiero.guanajuato.gob.mx"}
-  },
-  "Michoacán": {
-    en: {name:"Michoacán", desc:"Pilot productive return programs active. Estimated 2026 returned migrants: 1,800.", link:"https://www.gob.mx/bienestar"},
-    es: {name:"Michoacán", desc:"Programas piloto de retorno productivo activos. Migrantes retornados estimados 2026: 1,800.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Oaxaca": {
-    en: {name:"Oaxaca", desc:"Oaxaca es tu Tierra program active. Municipal hubs and federal support integrated. Estimated 2026: 2,100.", link:"https://www.gob.mx/bienestar"},
-    es: {name:"Oaxaca", desc:"Programa Oaxaca es tu Tierra activo. Hubs municipales y apoyo federal integrados. Estimado 2026: 2,100.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Puebla": {
-    en: {name:"Puebla", desc:"IPAM Puebla state program active. Estimated 2026 returned migrants: 900.", link:"https://www.gob.mx/bienestar"},
-    es: {name:"Puebla", desc:"Programa estatal IPAM Puebla activo. Migrantes retornados estimados 2026: 900.", link:"https://www.gob.mx/bienestar"}
-  }
-  // ... Add the remaining 32 states here with same structure
+  "Aguascalientes": {en:{desc:"No state-level reintegration program identified (2025). Federal options available.", link:"https://www.gob.mx/bienestar", returnees:200}, es:{desc:"No se identifica programa estatal de reintegración (2025). Opciones federales disponibles.", link:"https://www.gob.mx/bienestar", returnees:200}},
+  "Baja California": {en:{desc:"Federal and NGO programs support returned migrants.", link:"https://www.gob.mx/bienestar", returnees:1200}, es:{desc:"Programas federales y ONG apoyan a migrantes retornados.", link:"https://www.gob.mx/bienestar", returnees:1200}},
+  "Chiapas": {en:{desc:"Refugee & migrant stabilization, municipal hubs active.", link:"https://www.gob.mx/bienestar", returnees:500}, es:{desc:"Estabilización de refugiados y migrantes, hubs municipales activos.", link:"https://www.gob.mx/bienestar", returnees:500}},
+  "Guanajuato": {en:{desc:"MIGRANTEQUIERO state reintegration program active.", link:"https://migrantequiero.guanajuato.gob.mx", returnees:1500}, es:{desc:"Programa estatal MIGRANTEQUIERO activo.", link:"https://migrantequiero.guanajuato.gob.mx", returnees:1500}},
+  "Michoacán": {en:{desc:"Pilot productive return programs active.", link:"https://www.gob.mx/bienestar", returnees:1800}, es:{desc:"Programas piloto de retorno productivo activos.", link:"https://www.gob.mx/bienestar", returnees:1800}},
+  "Oaxaca": {en:{desc:"Oaxaca es tu Tierra program active. Municipal hubs integrated.", link:"https://www.gob.mx/bienestar", returnees:2100}, es:{desc:"Programa Oaxaca es tu Tierra activo. Hubs municipales integrados.", link:"https://www.gob.mx/bienestar", returnees:2100}},
+  "Puebla": {en:{desc:"IPAM Puebla state program active.", link:"https://www.gob.mx/bienestar", returnees:900}, es:{desc:"Programa estatal IPAM Puebla activo.", link:"https://www.gob.mx/bienestar", returnees:900}},
+  "Jalisco": {en:{desc:"Ventanilla Migrante + state programs.", link:"https://www.jalisco.gob.mx", returnees:1400}, es:{desc:"Ventanilla Migrante + programas estatales.", link:"https://www.jalisco.gob.mx", returnees:1400}},
+  "Mexico City": {en:{desc:"Multi-agency integration services.", link:"https://www.cdmx.gob.mx", returnees:1600}, es:{desc:"Servicios de integración multi-agencia.", link:"https://www.cdmx.gob.mx", returnees:1600}},
+  "Estado de México": {en:{desc:"Fondo de Apoyo a Migrantes.", link:"https://www.edomex.gob.mx", returnees:1300}, es:{desc:"Fondo de Apoyo a Migrantes.", link:"https://www.edomex.gob.mx", returnees:1300}},
+  "Morelos": {en:{desc:"Morelos te Abraza.", link:"https://www.morelos.gob.mx", returnees:600}, es:{desc:"Morelos te Abraza.", link:"https://www.morelos.gob.mx", returnees:600}},
+  "Nuevo León": {en:{desc:"Employment-focused reintegration.", link:"https://www.nl.gob.mx", returnees:1100}, es:{desc:"Reintegración enfocada al empleo.", link:"https://www.nl.gob.mx", returnees:1100}},
+  "Querétaro": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:300}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:300}},
+  "San Luis Potosí": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:400}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:400}},
+  "Yucatán": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:350}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:350}},
+  "Zacatecas": {en:{desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:450}, es:{desc:"No se identifica programa estatal de reintegración (2025).", link:"https://www.gob.mx/bienestar", returnees:450}}
+  // Add remaining states here in same format
 };
 
-// --- Load GeoJSON ---
+// ---------------- Load GeoJSON ----------------
 const geoUrl = 'https://raw.githubusercontent.com/open-mexico/mexico-geojson/master/states.geojson';
+let geoLayer;
 
 fetch(geoUrl)
 .then(res => res.json())
 .then(geojson => {
-  L.geoJSON(geojson, {
+  geoLayer = L.geoJSON(geojson, {
     style: {color:"#666", weight:1, fillColor:"#dcdcdc", fillOpacity:1},
     onEachFeature: function(feature, layer) {
       const name = feature.properties.name || feature.properties.NOM_ENT;
       layer.on('click', () => {
-        // Highlight
         layer.setStyle({fillColor:"#4a90e2"});
         geoLayer.resetStyleExcept(layer);
 
         const info = stateData[name];
-        if(info) {
-          document.getElementById('state-name').innerText = info[lang].name;
-          document.getElementById('state-description').innerText = info[lang].desc;
+        if(info){
+          document.getElementById('state-name').innerText = name;
+          document.getElementById('state-description').innerText = info[lang].desc + " Estimated 2026 returned: " + info[lang].returnees;
           document.getElementById('state-link').innerHTML = `<a href="${info[lang].link}" target="_blank">Official link</a>`;
         } else {
           document.getElementById('state-name').innerText = name;
@@ -115,13 +99,25 @@ fetch(geoUrl)
     }
   }).addTo(map).bringToBack();
 
-  // Helper to reset other styles
-  geoLayer = L.geoJSON(geojson);
-  geoLayer.resetStyleExcept = function(activeLayer) {
-    geoLayer.eachLayer(l => { if(l !== activeLayer) l.setStyle({fillColor:"#dcdcdc"}); });
-  }
+  geoLayer.resetStyleExcept = function(activeLayer){
+    geoLayer.eachLayer(l=>{if(l!==activeLayer) l.setStyle({fillColor:"#dcdcdc"});});
+  };
 })
-.catch(err=>console.error("GeoJSON load failed:", err));
+.catch(err => console.error("GeoJSON load failed:", err));
+
+// ---------------- Municipal Hubs ----------------
+const municipalHubs = [
+  {name:"Mexico Te Abraza – Tijuana", lat:32.525, lon:-117.038, link:"https://www.gob.mx/bienestar"},
+  {name:"Mexico Te Abraza – Ciudad Juárez", lat:31.690, lon:-106.424, link:"https://www.gob.mx/bienestar"},
+  {name:"Mexico Te Abraza – Oaxaca City", lat:17.073, lon:-96.725, link:"https://www.gob.mx/bienestar"},
+  {name:"Mexico Te Abraza – Monterrey", lat:25.686, lon:-100.316, link:"https://www.gob.mx/bienestar"}
+];
+
+municipalHubs.forEach(hub=>{
+  const marker = L.marker([hub.lat, hub.lon]).addTo(map);
+  marker.bindPopup(`<b>${hub.name}</b><br><a href="${hub.link}" target="_blank">Federal program info</a>`);
+});
+
 </script>
 </body>
 </html>
