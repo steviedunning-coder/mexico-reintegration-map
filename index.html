@@ -1,163 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<title>Mexico Reintegration & Return Landscape</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8" />
+<title>Mexico Reintegration & People Returned Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
 <style>
-  body { margin:0; font-family: system-ui, sans-serif; }
-  #map { height: 100vh; width: 100%; }
-  .legend { background:#fff; padding:10px; line-height:1.4; font-size:13px; }
-  .toggle { position:absolute; top:10px; right:10px; background:#fff; padding:8px; z-index:999; }
+  body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+  #map { width: 100vw; height: 100vh; }
+  .legend {
+    background: white;
+    padding: 10px;
+    font-size: 13px;
+    line-height: 1.4;
+  }
 </style>
 </head>
 
 <body>
-
-<div class="toggle">
-  <strong>Language</strong><br>
-  <button onclick="setLang('en')">EN</button>
-  <button onclick="setLang('es')">ES</button>
-</div>
-
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-/* ---------------------------
-   GLOBAL COORDINATE SAFETY
----------------------------- */
-function toLatLng(coord){
-  return [coord[1], coord[0]]; // ALWAYS lng,lat → lat,lng
-}
+/* -------------------------
+   MAP SETUP
+------------------------- */
+const map = L.map("map").setView([23.8, -102.5], 5);
 
-/* ---------------------------
-   MAP INIT (LOCKED BOUNDS)
----------------------------- */
-const map = L.map('map', {
-  maxBounds: [[14.3, -118.5],[32.9, -86.5]],
-  maxBoundsViscosity: 1.0
-}).setView([23.6, -102.5], 5);
-
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-  attribution:'© OpenStreetMap'
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap contributors"
 }).addTo(map);
 
-/* ---------------------------
-   LANGUAGE TOGGLE
----------------------------- */
-let currentLang = 'en';
-function setLang(lang){
-  currentLang = lang;
-  renderPoints();
+/* -------------------------
+   YOUR DATA (SAFE, NAME-BASED)
+------------------------- */
+const stateData = {
+  "Chiapas": {
+    returned: "High",
+    program: "No state-level reintegration program identified (as of 2025)",
+    link: "http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica"
+  },
+  "Oaxaca": {
+    returned: "High",
+    program: "Oaxaca es tu Tierra – productive return initiatives (pilot)",
+    link: "https://www.oaxaca.gob.mx"
+  },
+  "Puebla": {
+    returned: "Medium",
+    program: "IPAM Puebla – state reintegration services",
+    link: "https://www.ipam.puebla.gob.mx"
+  },
+  "Guanajuato": {
+    returned: "Medium",
+    program: "MigranteQuiero – active state reintegration program",
+    link: "https://migrantequiero.guanajuato.gob.mx"
+  }
+  // All other states default automatically
+};
+
+/* -------------------------
+   COLOR SCALE
+------------------------- */
+function colorByReturned(level) {
+  if (level === "High") return "#b30000";
+  if (level === "Medium") return "#e34a33";
+  if (level === "Low") return "#fdbb84";
+  return "#cccccc";
 }
 
-/* ---------------------------
-   DATA (SAMPLE – STRUCTURE LOCKED)
-   YOU CAN EXTEND SAFELY
----------------------------- */
-const municipalHubs = [
-  {
-    name_en: "Tapachula – México te Abraza",
-    name_es: "Tapachula – México te Abraza",
-    type: "federal",
-    coords: [-92.2634, 14.9056],
-    link: "https://www.gob.mx/segob/migracion"
-  },
-  {
-    name_en: "Tijuana – Integration Hub",
-    name_es: "Tijuana – Centro de Integración",
-    type: "municipal",
-    coords: [-117.0382, 32.5149],
-    link: "https://www.tijuana.gob.mx"
-  }
-];
+/* -------------------------
+   LOAD REAL MEXICO STATES
+   (NO MANUAL COORDINATES)
+------------------------- */
+fetch("https://raw.githubusercontent.com/angelnmara/geojson/master/mexicoHigh.json")
+  .then(res => res.json())
+  .then(geojson => {
 
-/* ---------------------------
-   PEOPLE RETURNED (STATE)
----------------------------- */
-const states = [
-  {
-    name: "Chiapas",
-    returned_2025: "High",
-    program_en: "No state-level reintegration program identified (as of 2025)",
-    program_es: "No se identificó programa estatal de reintegración (2025)",
-    link: "http://www.politicamigratoria.gob.mx/es/PoliticaMigratoria/tablero_estadistica",
-    centroid: [-92.6334, 16.7569]
-  },
-  {
-    name: "Oaxaca",
-    returned_2025: "High",
-    program_en: "Pilot reintegration initiatives aligned with federal strategies",
-    program_es: "Iniciativas piloto de reintegración alineadas a estrategias federales",
-    link: "https://www.oaxaca.gob.mx",
-    centroid: [-96.7266, 17.0732]
-  }
-];
+    L.geoJSON(geojson, {
+      style: feature => {
+        const name = feature.properties.name;
+        const data = stateData[name];
 
-/* ---------------------------
-   LAYERS
----------------------------- */
-let hubLayer = L.layerGroup().addTo(map);
-let stateLayer = L.layerGroup().addTo(map);
+        return {
+          fillColor: colorByReturned(data?.returned),
+          weight: 1,
+          color: "#555",
+          fillOpacity: 0.75
+        };
+      },
+      onEachFeature: (feature, layer) => {
+        const name = feature.properties.name;
+        const data = stateData[name];
 
-/* ---------------------------
-   RENDER
----------------------------- */
-function renderPoints(){
-  hubLayer.clearLayers();
-  stateLayer.clearLayers();
-
-  municipalHubs.forEach(h => {
-    L.circleMarker(
-      toLatLng(h.coords),
-      { radius:6, color:'#0057b7', fillOpacity:0.9 }
-    )
-    .bindPopup(`
-      <strong>${currentLang==='en'?h.name_en:h.name_es}</strong><br>
-      Level: ${h.type}<br>
-      <a href="${h.link}" target="_blank">Program link</a>
-    `)
-    .addTo(hubLayer);
+        layer.bindPopup(`
+          <strong>${name}</strong><br><br>
+          <strong>People returned:</strong>
+          ${data?.returned || "Data not publicly disaggregated"}<br><br>
+          ${data?.program || "No state-level reintegration program identified (as of 2025)"}<br><br>
+          ${data?.link ? `<a href="${data.link}" target="_blank">Public program / source</a>` : ""}
+        `);
+      }
+    }).addTo(map);
   });
 
-  states.forEach(s => {
-    L.circleMarker(
-      toLatLng(s.centroid),
-      { radius:8, color:'#b30000', fillOpacity:0.7 }
-    )
-    .bindPopup(`
-      <strong>${s.name}</strong><br>
-      <em>${currentLang==='en'?'People returned':'Personas retornadas'}: ${s.returned_2025}</em><br><br>
-      ${currentLang==='en'?s.program_en:s.program_es}<br>
-      <a href="${s.link}" target="_blank">Data source</a>
-    `)
-    .addTo(stateLayer);
-  });
-}
-
-renderPoints();
-
-/* ---------------------------
+/* -------------------------
    LEGEND
----------------------------- */
-const legend = L.control({position:'bottomleft'});
-legend.onAdd = function(){
-  const div = L.DomUtil.create('div','legend');
+------------------------- */
+const legend = L.control({ position: "bottomleft" });
+legend.onAdd = function () {
+  const div = L.DomUtil.create("div", "legend");
   div.innerHTML = `
     <strong>Map Guide</strong><br>
-    🔵 Municipal / Federal hubs<br>
-    🔴 State-level people returned<br><br>
-    “People returned” = deported or formally returned to Mexico
+    ■ High people returned<br>
+    ■ Medium<br>
+    ■ Low<br>
+    ■ No public data<br><br>
+    “People returned” refers to individuals deported or formally returned to Mexico
   `;
   return div;
 };
 legend.addTo(map);
-
 </script>
+
 </body>
 </html>
