@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Mexico Return & Reintegration Map (2025)</title>
+<title>Mexico Return & Reintegration Map (2025–2026)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -20,10 +20,12 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
   border-radius: 6px;
   font-size: 13px;
   box-shadow: 0 2px 12px rgba(0,0,0,.25);
-  max-width: 380px;
+  max-width: 420px;
   z-index: 1000;
 }
 .legend span { display:block; margin-bottom:4px; }
+.legend a { color:#0057b7; text-decoration:none; }
+.legend a:hover { text-decoration:underline; }
 </style>
 </head>
 
@@ -32,7 +34,7 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
 <div id="map"></div>
 
 <div class="legend">
-<strong>Mexico Return & Reintegration (2025)</strong><br><br>
+<strong>Mexico Return & Reintegration (2025–2026)</strong><br><br>
 
 Click a state to view:<br>
 • Mexican nationals returned from the U.S. (2025)<br>
@@ -94,19 +96,62 @@ const coords = {
 
 /* -------- DATA -------- */
 const data = {
-"Morelos":{mx:1873, prog:"🟢 Morelos te Abraza – vocational training, entrepreneurship credit<br>🟢 Migrantes en el Corazón – social & economic reintegration"},
-"Puebla":{mx:9490, prog:"🟢 Instituto Poblano de Asistencia al Migrante (IPAM): Migrante Emprende, skills certification, job linkage<br>🟢 Puebla City municipal linkage with IPAM"},
-"Guanajuato":{mx:9790, prog:"🟢 Conecta platform – private-sector job matching for returnees<br>🟡 MigranteQuiero – expanding reintegration support"},
-"Oaxaca":{mx:12526, prog:"🟢 Oaxaca es tu tierra – productive and dignified return initiatives"},
-"Estado de México":{mx:7205, prog:"🟢 Fondo de Apoyo a Migrantes (state implementation)"},
-"Jalisco":{mx:6048, prog:"🟢 Fondo de Apoyo a Migrantes – income and employment support"},
-"Michoacán":{mx:11388, prog:"🟡 Productive return and cooperative reintegration initiatives"},
-"Baja California":{mx:3020, prog:"⚪ Mexico Recognizes Your Experience (federal)<br>⚪ Build Your Future Here (federal)"},
-"Sonora":{mx:3318, prog:"⚪ Federal repatriation-linked employment access"},
-"Chihuahua":{mx:5180, prog:"⚪ Federal workforce & documentation support"},
-"Tamaulipas":{mx:4753, prog:"⚪ Federal repatriation-linked employment access"},
-"Nuevo León":{mx:1152, prog:"⚪ Federal workforce certification & job access"},
-"Mexico City":{mx:3168, prog:"🟢 Documentation, employment linkage, multi-agency integration"},
+"Morelos":{
+ mx:1873,
+ prog:`🟢 <a href="https://www.morelos.gob.mx" target="_blank">Morelos te Abraza</a> – vocational training & entrepreneurship<br>
+ 🟢 Migrantes en el Corazón – social & economic reintegration`
+},
+"Puebla":{
+ mx:9490,
+ prog:`🟢 <a href="https://ipam.puebla.gob.mx" target="_blank">Instituto Poblano de Asistencia al Migrante (IPAM)</a> – Migrante Emprende, skills certification, job linkage<br>
+ 🟢 Puebla City municipal linkage with IPAM`
+},
+"Guanajuato":{
+ mx:9790,
+ prog:`🟢 <a href="https://conecta.guanajuato.gob.mx" target="_blank">Conecta Guanajuato</a> – private-sector job matching for returnees<br>
+ 🟡 <a href="https://migrantequiero.guanajuato.gob.mx" target="_blank">MigranteQuiero</a> – expanding reintegration support`
+},
+"Oaxaca":{
+ mx:12526,
+ prog:`🟢 <a href="https://www.oaxaca.gob.mx" target="_blank">Oaxaca es tu tierra</a> – productive & dignified return initiatives`
+},
+"Estado de México":{
+ mx:7205,
+ prog:`🟢 Fondo de Apoyo a Migrantes – state implementation (Edomex)`
+},
+"Jalisco":{
+ mx:6048,
+ prog:`🟢 <a href="https://www.jalisco.gob.mx/es/gobierno/fondo-de-apoyo-migrantes" target="_blank">Fondo de Apoyo a Migrantes</a> – income & employment support`
+},
+"Michoacán":{
+ mx:11388,
+ prog:`🟡 Productive return & cooperative reintegration initiatives`
+},
+"Baja California":{
+ mx:3020,
+ prog:`⚪ <a href="https://www.gob.mx/sep/acciones-y-programas/mexico-reconoce-tu-experiencia" target="_blank">Mexico Recognizes Your Experience</a><br>
+ ⚪ <a href="https://www.gob.mx/stps" target="_blank">Build Your Future Here</a>`
+},
+"Sonora":{
+ mx:3318,
+ prog:`⚪ Federal repatriation-linked employment & certification access`
+},
+"Chihuahua":{
+ mx:5180,
+ prog:`⚪ Federal workforce & documentation support`
+},
+"Tamaulipas":{
+ mx:4753,
+ prog:`⚪ Federal repatriation-linked employment access`
+},
+"Nuevo León":{
+ mx:1152,
+ prog:`⚪ Federal workforce certification & job access`
+},
+"Mexico City":{
+ mx:3168,
+ prog:`🟢 <a href="https://www.cdmx.gob.mx" target="_blank">Multi-agency integration services (CDMX)</a>`
+},
 "Guerrero":{mx:14260},
 "Chiapas":{mx:11660},
 "Veracruz":{mx:9657},
@@ -137,7 +182,8 @@ Object.keys(coords).forEach(state => {
     <strong>${state}</strong><br>
     <strong>Mexican nationals returned (2025):</strong>
     ${d.mx.toLocaleString()}<br><br>
-    ${d.prog ? `<strong>Programs & initiatives:</strong><br>${d.prog}` : "<em>Federal reintegration programs available nationwide</em>"}
+    ${d.prog ? `<strong>Programs & initiatives:</strong><br>${d.prog}` :
+    "<em>Federal reintegration programs available nationwide</em>"}
   `;
 
   L.marker(c).addTo(map).bindPopup(popup);
