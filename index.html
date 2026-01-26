@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Mexico Return & Reintegration Map (2025–2026)</title>
+<title>Mexico Return & Reintegration (2025–2026)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -42,7 +42,7 @@ Click a state to view:<br>
 
 <span>🟢 Active state / municipal program</span>
 <span>🟡 Pilot or emerging initiative</span>
-<span>⚪ Federal program (nationwide access)</span><br>
+<span>⚪ Federal program (nationwide or border reception)</span><br>
 
 <strong>Data source:</strong><br>
 Unidad de Política Migratoria, Registro e Identidad de Personas (SEGOB)<br>
@@ -98,90 +98,71 @@ const coords = {
 const data = {
 "Morelos":{
  mx:1873,
- prog:`🟢 <a href="https://www.morelos.gob.mx" target="_blank">Morelos te Abraza</a> – vocational training & entrepreneurship<br>
+ prog:`🟢 <a href="https://www.morelos.gob.mx" target="_blank">Morelos te Abraza</a><br>
  🟢 Migrantes en el Corazón – social & economic reintegration`
 },
 "Puebla":{
  mx:9490,
- prog:`🟢 <a href="https://ipam.puebla.gob.mx" target="_blank">Instituto Poblano de Asistencia al Migrante (IPAM)</a> – Migrante Emprende, skills certification, job linkage<br>
- 🟢 Puebla City municipal linkage with IPAM`
+ prog:`🟢 <a href="https://ipam.puebla.gob.mx" target="_blank">Instituto Poblano de Asistencia al Migrante (IPAM)</a><br>
+ 🟢 <a href="https://www.publimetro.com.mx/puebla/2025/03/04/centro-de-capacitacion-de-empleo-para-migrantes-repatriados-ubicacion-y-que-ofrecera/" target="_blank">Centro de Capacitación para el Empleo (Migrantes Repatriados)</a>`
 },
 "Guanajuato":{
  mx:9790,
- prog:`🟢 <a href="https://conecta.guanajuato.gob.mx" target="_blank">Conecta Guanajuato</a> – private-sector job matching for returnees<br>
- 🟡 <a href="https://migrantequiero.guanajuato.gob.mx" target="_blank">MigranteQuiero</a> – expanding reintegration support`
-},
-"Oaxaca":{
- mx:12526,
- prog:`🟢 <a href="https://www.oaxaca.gob.mx" target="_blank">Oaxaca es tu tierra</a> – productive & dignified return initiatives`
-},
-"Estado de México":{
- mx:7205,
- prog:`🟢 Fondo de Apoyo a Migrantes – state implementation (Edomex)`
-},
-"Jalisco":{
- mx:6048,
- prog:`🟢 <a href="https://www.jalisco.gob.mx/es/gobierno/fondo-de-apoyo-migrantes" target="_blank">Fondo de Apoyo a Migrantes</a> – income & employment support`
+ prog:`🟢 <a href="https://coneecta.net/" target="_blank">Conecta (Guanajuato)</a> – private-sector job matching<br>
+ 🟡 <a href="https://migrantequiero.guanajuato.gob.mx" target="_blank">MigranteQuiero</a>`
 },
 "Michoacán":{
  mx:11388,
- prog:`🟡 Productive return & cooperative reintegration initiatives`
+ prog:`🟡 <a href="https://ideasnet.org/microempresarios-latinoamericanos-y-retornados-en-mexico/" target="_blank">IDEASnet – Financial Inclusion for Returnee Entrepreneurs</a>`
 },
-"Baja California":{
- mx:3020,
- prog:`⚪ <a href="https://www.gob.mx/sep/acciones-y-programas/mexico-reconoce-tu-experiencia" target="_blank">Mexico Recognizes Your Experience</a><br>
- ⚪ <a href="https://www.gob.mx/stps" target="_blank">Build Your Future Here</a>`
+"Oaxaca":{
+ mx:12526,
+ prog:`🟢 <a href="https://www.oaxaca.gob.mx" target="_blank">Oaxaca es tu tierra</a>`
 },
-"Sonora":{
- mx:3318,
- prog:`⚪ Federal repatriation-linked employment & certification access`
+"Estado de México":{
+ mx:7205,
+ prog:`🟢 Fondo de Apoyo a Migrantes (state implementation)`
 },
-"Chihuahua":{
- mx:5180,
- prog:`⚪ Federal workforce & documentation support`
+"Jalisco":{
+ mx:6048,
+ prog:`🟢 <a href="https://www.jalisco.gob.mx/es/gobierno/fondo-de-apoyo-migrantes" target="_blank">Fondo de Apoyo a Migrantes</a>`
 },
 "Tamaulipas":{
  mx:4753,
- prog:`⚪ Federal repatriation-linked employment access`
+ prog:`🟢 <a href="https://accesolatino.org/camino/" target="_blank">Acceso Latino – CAMINO Program</a><br>
+ ⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
+},
+"Baja California":{
+ mx:3020,
+ prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
+},
+"Sonora":{
+ mx:3318,
+ prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
+},
+"Chihuahua":{
+ mx:5180,
+ prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
+},
+"Coahuila":{
+ mx:2016,
+ prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
 },
 "Nuevo León":{
  mx:1152,
- prog:`⚪ Federal workforce certification & job access`
-},
-"Mexico City":{
- mx:3168,
- prog:`🟢 <a href="https://www.cdmx.gob.mx" target="_blank">Multi-agency integration services (CDMX)</a>`
-},
-"Guerrero":{mx:14260},
-"Chiapas":{mx:11660},
-"Veracruz":{mx:9657},
-"Sinaloa":{mx:5762},
-"Hidalgo":{mx:3734},
-"San Luis Potosí":{mx:3746},
-"Zacatecas":{mx:3168},
-"Durango":{mx:2304},
-"Querétaro":{mx:2304},
-"Coahuila":{mx:2016},
-"Nayarit":{mx:2016},
-"Aguascalientes":{mx:1580},
-"Tabasco":{mx:1152},
-"Tlaxcala":{mx:720},
-"Colima":{mx:576},
-"Campeche":{mx:432},
-"Quintana Roo":{mx:288},
-"Yucatán":{mx:288},
-"Baja California Sur":{mx:144}
+ prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
+}
 };
 
 /* -------- MARKERS -------- */
 Object.keys(coords).forEach(state => {
   const c = coords[state];
-  const d = data[state] || {mx:0};
+  const d = data[state] || {};
 
   const popup = `
     <strong>${state}</strong><br>
     <strong>Mexican nationals returned (2025):</strong>
-    ${d.mx.toLocaleString()}<br><br>
+    ${(d.mx || 0).toLocaleString()}<br><br>
     ${d.prog ? `<strong>Programs & initiatives:</strong><br>${d.prog}` :
     "<em>Federal reintegration programs available nationwide</em>"}
   `;
