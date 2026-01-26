@@ -25,7 +25,6 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
 }
 .legend span { display:block; margin-bottom:4px; }
 .legend a { color:#0057b7; text-decoration:none; }
-.legend a:hover { text-decoration:underline; }
 </style>
 </head>
 
@@ -36,15 +35,15 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
 <div class="legend">
 <strong>Mexico Return & Reintegration (2025–2026)</strong><br><br>
 
+Use the toggle (top-left) to switch between:<br>
+• <strong>State of Origin</strong> (where people are from)<br>
+• <strong>State of Destination</strong> (where people arrive)<br><br>
+
 Click a state to view:<br>
-• Mexican nationals returned from the U.S. (2025)<br>
+• Returned Mexican nationals (2025)<br>
 • Active, pilot, or emerging reintegration programs (2026)<br><br>
 
-<span>🟢 Active state / municipal program</span>
-<span>🟡 Pilot or emerging initiative</span>
-<span>⚪ Federal program (nationwide or border reception)</span><br>
-
-<strong>Data source:</strong><br>
+<strong>Data source</strong><br>
 Unidad de Política Migratoria, Registro e Identidad de Personas (SEGOB)<br>
 <em>Boletín de Estadísticas Migratorias 2025 (enero–noviembre)</em><br><br>
 
@@ -60,115 +59,109 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 
 /* -------- STATE CENTROIDS -------- */
 const coords = {
-"Aguascalientes":[21.88,-102.29],
-"Baja California":[32.51,-117.03],
-"Baja California Sur":[24.14,-110.31],
-"Campeche":[19.83,-90.53],
-"Chiapas":[16.75,-93.12],
-"Chihuahua":[28.63,-106.07],
-"Coahuila":[25.43,-100.99],
-"Colima":[19.24,-103.72],
-"Durango":[24.03,-104.65],
-"Guanajuato":[21.01,-101.25],
-"Guerrero":[17.55,-99.50],
-"Hidalgo":[20.10,-98.76],
-"Jalisco":[20.65,-103.35],
-"Mexico City":[19.43,-99.13],
-"Estado de México":[19.28,-99.65],
-"Michoacán":[19.56,-101.70],
-"Morelos":[18.68,-99.10],
-"Nayarit":[21.75,-104.84],
-"Nuevo León":[25.68,-100.31],
-"Oaxaca":[17.07,-96.72],
-"Puebla":[19.04,-98.20],
-"Querétaro":[20.58,-100.39],
-"Quintana Roo":[19.18,-88.48],
-"San Luis Potosí":[22.15,-100.98],
-"Sinaloa":[24.80,-107.39],
-"Sonora":[29.07,-110.95],
-"Tabasco":[17.84,-92.61],
-"Tamaulipas":[23.74,-99.14],
-"Tlaxcala":[19.31,-98.23],
-"Veracruz":[19.17,-96.13],
-"Yucatán":[20.70,-89.09],
-"Zacatecas":[22.77,-102.58]
+"Aguascalientes":[21.88,-102.29],"Baja California":[32.51,-117.03],
+"Baja California Sur":[24.14,-110.31],"Campeche":[19.83,-90.53],
+"Chiapas":[16.75,-93.12],"Chihuahua":[28.63,-106.07],
+"Coahuila":[25.43,-100.99],"Colima":[19.24,-103.72],
+"Durango":[24.03,-104.65],"Guanajuato":[21.01,-101.25],
+"Guerrero":[17.55,-99.50],"Hidalgo":[20.10,-98.76],
+"Jalisco":[20.65,-103.35],"Mexico City":[19.43,-99.13],
+"Estado de México":[19.28,-99.65],"Michoacán":[19.56,-101.70],
+"Morelos":[18.68,-99.10],"Nayarit":[21.75,-104.84],
+"Nuevo León":[25.68,-100.31],"Oaxaca":[17.07,-96.72],
+"Puebla":[19.04,-98.20],"Querétaro":[20.58,-100.39],
+"Quintana Roo":[19.18,-88.48],"San Luis Potosí":[22.15,-100.98],
+"Sinaloa":[24.80,-107.39],"Sonora":[29.07,-110.95],
+"Tabasco":[17.84,-92.61],"Tamaulipas":[23.74,-99.14],
+"Tlaxcala":[19.31,-98.23],"Veracruz":[19.17,-96.13],
+"Yucatán":[20.70,-89.09],"Zacatecas":[22.77,-102.58]
 };
 
 /* -------- DATA -------- */
-const data = {
-"Morelos":{
- mx:1873,
- prog:`🟢 <a href="https://www.morelos.gob.mx" target="_blank">Morelos te Abraza</a><br>
- 🟢 Migrantes en el Corazón – social & economic reintegration`
-},
-"Puebla":{
- mx:9490,
- prog:`🟢 <a href="https://ipam.puebla.gob.mx" target="_blank">Instituto Poblano de Asistencia al Migrante (IPAM)</a><br>
- 🟢 <a href="https://www.publimetro.com.mx/puebla/2025/03/04/centro-de-capacitacion-de-empleo-para-migrantes-repatriados-ubicacion-y-que-ofrecera/" target="_blank">Centro de Capacitación para el Empleo (Migrantes Repatriados)</a>`
-},
-"Guanajuato":{
- mx:9790,
- prog:`🟢 <a href="https://coneecta.net/" target="_blank">Conecta (Guanajuato)</a> – private-sector job matching<br>
- 🟡 <a href="https://migrantequiero.guanajuato.gob.mx" target="_blank">MigranteQuiero</a>`
-},
-"Michoacán":{
- mx:11388,
- prog:`🟡 <a href="https://ideasnet.org/microempresarios-latinoamericanos-y-retornados-en-mexico/" target="_blank">IDEASnet – Financial Inclusion for Returnee Entrepreneurs</a>`
-},
-"Oaxaca":{
- mx:12526,
- prog:`🟢 <a href="https://www.oaxaca.gob.mx" target="_blank">Oaxaca es tu tierra</a>`
-},
-"Estado de México":{
- mx:7205,
- prog:`🟢 Fondo de Apoyo a Migrantes (state implementation)`
-},
-"Jalisco":{
- mx:6048,
- prog:`🟢 <a href="https://www.jalisco.gob.mx/es/gobierno/fondo-de-apoyo-migrantes" target="_blank">Fondo de Apoyo a Migrantes</a>`
-},
-"Tamaulipas":{
- mx:4753,
- prog:`🟢 <a href="https://accesolatino.org/camino/" target="_blank">Acceso Latino – CAMINO Program</a><br>
- ⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
-},
-"Baja California":{
- mx:3020,
- prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
-},
-"Sonora":{
- mx:3318,
- prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
-},
-"Chihuahua":{
- mx:5180,
- prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
-},
-"Coahuila":{
- mx:2016,
- prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
-},
-"Nuevo León":{
- mx:1152,
- prog:`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`
-}
+const states = {
+"Guerrero":{origin:14260,dest:10084},
+"Oaxaca":{origin:12526,dest:8644},
+"Chiapas":{origin:11667,dest:0},
+"Michoacán":{origin:11388,dest:8357},
+"Guanajuato":{origin:9790,dest:8357},
+"Veracruz":{origin:9647,dest:6761},
+"Puebla":{origin:9490,dest:7059},
+"Estado de México":{origin:7205,dest:6040},
+"Jalisco":{origin:6048,dest:4753},
+"Sinaloa":{origin:5762,dest:4322},
+"Tamaulipas":{origin:4753,dest:7635},
+"Sonora":{origin:3318,dest:5032},
+"Baja California":{origin:3020,dest:24072},
+"Mexico City":{origin:3169,dest:3169},
+"Hidalgo":{origin:3746,dest:3169},
+"San Luis Potosí":{origin:3746,dest:3318},
+"Nuevo León":{origin:1152,dest:2305},
+"Morelos":{origin:1873,dest:1729},
+"Aguascalientes":{origin:1585,dest:1441},
+"Durango":{origin:2305,dest:1873},
+"Nayarit":{origin:2017,dest:1441},
+"Coahuila":{origin:2017,dest:2449},
+"Zacatecas":{origin:3169,dest:2737},
+"Querétaro":{origin:0,dest:2305},
+"Tabasco":{origin:1152,dest:864},
+"Tlaxcala":{origin:720,dest:576},
+"Colima":{origin:576,dest:432},
+"Campeche":{origin:432,dest:432},
+"Quintana Roo":{origin:288,dest:288},
+"Yucatán":{origin:288,dest:288},
+"Baja California Sur":{origin:144,dest:144}
 };
 
-/* -------- MARKERS -------- */
-Object.keys(coords).forEach(state => {
-  const c = coords[state];
-  const d = data[state] || {};
+/* -------- PROGRAM INFO (UNCHANGED ACROSS VIEWS) -------- */
+const programs = {
+"Morelos":"🟢 Morelos te Abraza; Migrantes en el Corazón",
+"Puebla":"🟢 IPAM; Centro de Capacitación para el Empleo",
+"Guanajuato":"🟢 Conecta (coneecta.net); 🟡 MigranteQuiero",
+"Michoacán":"🟡 IDEASnet – Financial Inclusion",
+"Oaxaca":"🟢 Oaxaca es tu tierra",
+"Jalisco":"🟢 Fondo de Apoyo a Migrantes",
+"Tamaulipas":"🟢 Acceso Latino – CAMINO; ⚪ Tarjeta Paisano",
+"Baja California":"⚪ Tarjeta Paisano",
+"Sonora":"⚪ Tarjeta Paisano",
+"Chihuahua":"⚪ Tarjeta Paisano",
+"Coahuila":"⚪ Tarjeta Paisano",
+"Nuevo León":"⚪ Tarjeta Paisano"
+};
 
-  const popup = `
+/* -------- LAYERS -------- */
+const originLayer = L.layerGroup();
+const destLayer = L.layerGroup();
+
+Object.keys(coords).forEach(state=>{
+  const c = coords[state];
+  const d = states[state] || {};
+  const prog = programs[state] || "Federal reintegration programs available nationwide";
+
+  const originPopup = `
     <strong>${state}</strong><br>
-    <strong>Mexican nationals returned (2025):</strong>
-    ${(d.mx || 0).toLocaleString()}<br><br>
-    ${d.prog ? `<strong>Programs & initiatives:</strong><br>${d.prog}` :
-    "<em>Federal reintegration programs available nationwide</em>"}
+    <strong>Returned (state of origin, 2025):</strong>
+    ${(d.origin||0).toLocaleString()}<br><br>
+    <strong>Programs & initiatives:</strong><br>${prog}
   `;
 
-  L.marker(c).addTo(map).bindPopup(popup);
+  const destPopup = `
+    <strong>${state}</strong><br>
+    <strong>Returned (state of destination, 2025):</strong>
+    ${(d.dest||0).toLocaleString()}<br><br>
+    <strong>Programs & initiatives:</strong><br>${prog}
+  `;
+
+  L.marker(c).bindPopup(originPopup).addTo(originLayer);
+  L.marker(c).bindPopup(destPopup).addTo(destLayer);
 });
+
+originLayer.addTo(map);
+
+L.control.layers(
+  { "State of Origin": originLayer, "State of Destination": destLayer },
+  null,
+  { collapsed:false, position:"topleft" }
+).addTo(map);
 </script>
 
 </body>
