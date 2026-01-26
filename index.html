@@ -23,8 +23,8 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
   max-width: 420px;
   z-index: 1000;
 }
-.legend span { display:block; margin-bottom:4px; }
 .legend a { color:#0057b7; text-decoration:none; }
+.legend a:hover { text-decoration:underline; }
 </style>
 </head>
 
@@ -36,8 +36,8 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
 <strong>Mexico Return & Reintegration (2025–2026)</strong><br><br>
 
 Use the toggle (top-left) to switch between:<br>
-• <strong>State of Origin</strong> (where people are from)<br>
-• <strong>State of Destination</strong> (where people arrive)<br><br>
+• <strong>State of origin</strong> (where people are from)<br>
+• <strong>State of destination</strong> (where people arrive)<br><br>
 
 Click a state to view:<br>
 • Returned Mexican nationals (2025)<br>
@@ -55,9 +55,9 @@ Total Mexican nationals returned (2025): <strong>144,061</strong>
 <script>
 const map = L.map("map").setView([23.5, -102], 5);
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
- { attribution: "© OpenStreetMap contributors" }).addTo(map);
+ { attribution:"© OpenStreetMap contributors" }).addTo(map);
 
-/* -------- STATE CENTROIDS -------- */
+/* ---------- CENTROIDS ---------- */
 const coords = {
 "Aguascalientes":[21.88,-102.29],"Baja California":[32.51,-117.03],
 "Baja California Sur":[24.14,-110.31],"Campeche":[19.83,-90.53],
@@ -77,90 +77,64 @@ const coords = {
 "Yucatán":[20.70,-89.09],"Zacatecas":[22.77,-102.58]
 };
 
-/* -------- DATA -------- */
-const states = {
-"Guerrero":{origin:14260,dest:10084},
-"Oaxaca":{origin:12526,dest:8644},
-"Chiapas":{origin:11667,dest:0},
-"Michoacán":{origin:11388,dest:8357},
-"Guanajuato":{origin:9790,dest:8357},
-"Veracruz":{origin:9647,dest:6761},
-"Puebla":{origin:9490,dest:7059},
-"Estado de México":{origin:7205,dest:6040},
-"Jalisco":{origin:6048,dest:4753},
-"Sinaloa":{origin:5762,dest:4322},
-"Tamaulipas":{origin:4753,dest:7635},
-"Sonora":{origin:3318,dest:5032},
-"Baja California":{origin:3020,dest:24072},
-"Mexico City":{origin:3169,dest:3169},
-"Hidalgo":{origin:3746,dest:3169},
-"San Luis Potosí":{origin:3746,dest:3318},
-"Nuevo León":{origin:1152,dest:2305},
-"Morelos":{origin:1873,dest:1729},
-"Aguascalientes":{origin:1585,dest:1441},
-"Durango":{origin:2305,dest:1873},
-"Nayarit":{origin:2017,dest:1441},
-"Coahuila":{origin:2017,dest:2449},
-"Zacatecas":{origin:3169,dest:2737},
-"Querétaro":{origin:0,dest:2305},
-"Tabasco":{origin:1152,dest:864},
-"Tlaxcala":{origin:720,dest:576},
-"Colima":{origin:576,dest:432},
-"Campeche":{origin:432,dest:432},
-"Quintana Roo":{origin:288,dest:288},
-"Yucatán":{origin:288,dest:288},
-"Baja California Sur":{origin:144,dest:144}
+/* ---------- RETURN DATA ---------- */
+const returns = {
+"Guerrero":{o:14260,d:10084},"Oaxaca":{o:12526,d:8644},
+"Chiapas":{o:11667,d:0},"Michoacán":{o:11388,d:8357},
+"Guanajuato":{o:9790,d:8357},"Veracruz":{o:9647,d:6761},
+"Puebla":{o:9490,d:7059},"Estado de México":{o:7205,d:6040},
+"Jalisco":{o:6048,d:4753},"Sinaloa":{o:5762,d:4322},
+"Tamaulipas":{o:4753,d:7635},"Sonora":{o:3318,d:5032},
+"Baja California":{o:3020,d:24072}
 };
 
-/* -------- PROGRAM INFO (UNCHANGED ACROSS VIEWS) -------- */
+/* ---------- PROGRAMS (WITH LINKS) ---------- */
 const programs = {
-"Morelos":"🟢 Morelos te Abraza; Migrantes en el Corazón",
-"Puebla":"🟢 IPAM; Centro de Capacitación para el Empleo",
-"Guanajuato":"🟢 Conecta (coneecta.net); 🟡 MigranteQuiero",
-"Michoacán":"🟡 IDEASnet – Financial Inclusion",
-"Oaxaca":"🟢 Oaxaca es tu tierra",
-"Jalisco":"🟢 Fondo de Apoyo a Migrantes",
-"Tamaulipas":"🟢 Acceso Latino – CAMINO; ⚪ Tarjeta Paisano",
-"Baja California":"⚪ Tarjeta Paisano",
-"Sonora":"⚪ Tarjeta Paisano",
-"Chihuahua":"⚪ Tarjeta Paisano",
-"Coahuila":"⚪ Tarjeta Paisano",
-"Nuevo León":"⚪ Tarjeta Paisano"
+"Morelos":`🟢 <a href="https://www.morelos.gob.mx" target="_blank">Morelos te Abraza</a><br>
+🟢 Migrantes en el Corazón`,
+"Puebla":`🟢 <a href="https://ipam.puebla.gob.mx" target="_blank">Instituto Poblano de Asistencia al Migrante</a><br>
+🟢 <a href="https://www.publimetro.com.mx/puebla/2025/03/04/centro-de-capacitacion-de-empleo-para-migrantes-repatriados-ubicacion-y-que-ofrecera/" target="_blank">Centro de Capacitación para el Empleo</a>`,
+"Guanajuato":`🟢 <a href="https://coneecta.net/" target="_blank">Conecta</a><br>
+🟡 <a href="https://migrantequiero.guanajuato.gob.mx" target="_blank">MigranteQuiero</a>`,
+"Michoacán":`🟡 <a href="https://ideasnet.org/microempresarios-latinoamericanos-y-retornados-en-mexico/" target="_blank">IDEASnet – Financial Inclusion</a>`,
+"Oaxaca":`🟢 <a href="https://www.oaxaca.gob.mx" target="_blank">Oaxaca es tu tierra</a>`,
+"Jalisco":`🟢 <a href="https://www.jalisco.gob.mx/es/gobierno/fondo-de-apoyo-migrantes" target="_blank">Fondo de Apoyo a Migrantes</a>`,
+"Tamaulipas":`🟢 <a href="https://accesolatino.org/camino/" target="_blank">Acceso Latino – CAMINO</a><br>
+⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`,
+"Baja California":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
+"Sonora":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
+"Chihuahua":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
+"Coahuila":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
+"Nuevo León":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`
 };
 
-/* -------- LAYERS -------- */
-const originLayer = L.layerGroup();
-const destLayer = L.layerGroup();
+/* ---------- LAYERS ---------- */
+const origin = L.layerGroup();
+const destination = L.layerGroup();
 
-Object.keys(coords).forEach(state=>{
-  const c = coords[state];
-  const d = states[state] || {};
-  const prog = programs[state] || "Federal reintegration programs available nationwide";
+Object.keys(coords).forEach(s=>{
+  const r = returns[s] || {o:0,d:0};
+  const p = programs[s] || "Federal reintegration programs available nationwide";
 
-  const originPopup = `
-    <strong>${state}</strong><br>
-    <strong>Returned (state of origin, 2025):</strong>
-    ${(d.origin||0).toLocaleString()}<br><br>
-    <strong>Programs & initiatives:</strong><br>${prog}
-  `;
+  L.marker(coords[s]).bindPopup(
+    `<strong>${s}</strong><br>
+    <strong>Returned (origin, 2025):</strong> ${r.o.toLocaleString()}<br><br>
+    <strong>Programs:</strong><br>${p}`
+  ).addTo(origin);
 
-  const destPopup = `
-    <strong>${state}</strong><br>
-    <strong>Returned (state of destination, 2025):</strong>
-    ${(d.dest||0).toLocaleString()}<br><br>
-    <strong>Programs & initiatives:</strong><br>${prog}
-  `;
-
-  L.marker(c).bindPopup(originPopup).addTo(originLayer);
-  L.marker(c).bindPopup(destPopup).addTo(destLayer);
+  L.marker(coords[s]).bindPopup(
+    `<strong>${s}</strong><br>
+    <strong>Returned (destination, 2025):</strong> ${r.d.toLocaleString()}<br><br>
+    <strong>Programs:</strong><br>${p}`
+  ).addTo(destination);
 });
 
-originLayer.addTo(map);
+origin.addTo(map);
 
 L.control.layers(
-  { "State of Origin": originLayer, "State of Destination": destLayer },
+  { "State of Origin": origin, "State of Destination": destination },
   null,
-  { collapsed:false, position:"topleft" }
+  { position:"topleft", collapsed:false }
 ).addTo(map);
 </script>
 
