@@ -30,9 +30,10 @@
     left: 20px;
     z-index: 1000;
     background: white;
-    padding: 6px 10px;
+    padding: 8px 12px;
     border-radius: 5px;
     cursor: pointer;
+    font-weight: bold;
     box-shadow: 0 0 6px rgba(0,0,0,0.2);
   }
 </style>
@@ -44,7 +45,7 @@
 <div class="legend" id="legend">
   <strong>How to use this map:</strong><br>
   • Click a state marker to view integration data (state programs, pilots, proposed).<br>
-  • Use the <strong>toggle button (top-left)</strong> to switch between 2025 returnees and 2026 projected programs/pilots.<br>
+  • Use the <strong>toggle button (top-left)</strong> to switch between <strong>2025 returnees</strong> and <strong>2026 projected programs/pilots</strong>.<br>
   <br>
   <strong>Data source:</strong><br>
   Unidad de Política Migratoria, Registro e Identidad de Personas (UPMRIP), SEGOB<br>
@@ -77,175 +78,56 @@ document.getElementById('overlayToggle').onclick = function() {
     }
 };
 
-// State data (32 states) 2025 returnees + programs
+// --- STATE DATA (32 states) 2025 returnees + programs/pilots 2026 ---
 var stateData = {
-  "Aguascalientes": {
-    "2025": {desc:"No state-level reintegration program identified (2025). Federal options available.", link:"https://www.gob.mx/bienestar", returnees:1580},
-    "2026": {desc:"Projected program: none officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Baja California": {
-    "2025": {desc:"Mexico Te Abraza operational. Federal and NGO programs support returned migrants.", link:"https://www.gob.mx/bienestar", returnees:3020},
-    "2026": {desc:"Mexico Te Abraza continues; no additional state-level programs projected.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Baja California Sur": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:144},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Campeche": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:432},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Chiapas": {
-    "2025": {desc:"Refugee & migrant stabilization programs active. Federal options also available.", link:"https://www.gob.mx/bienestar", returnees:11660},
-    "2026": {desc:"Projected programs continue stabilization focus.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Chihuahua": {
-    "2025": {desc:"Mexico Te Abraza operational. Federal and municipal support programs.", link:"https://www.gob.mx/bienestar", returnees:5180},
-    "2026": {desc:"Projected programs continue federal-municipal support.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Coahuila": {
-    "2025": {desc:"Mexico Te Abraza operational. Federal employment linkage programs.", link:"https://www.gob.mx/bienestar", returnees:2016},
-    "2026": {desc:"Projected programs continue employment linkage.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Colima": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:576},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Durango": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2304},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Guanajuato": {
-    "2025": {desc:"Conecta platform active. State reintegration program active.", link:"https://migrantequiero.guanajuato.gob.mx", returnees:9790},
-    "2026": {desc:"Projected Conecta program continues with job linkage support.", link:"https://migrantequiero.guanajuato.gob.mx"}
-  },
-  "Guerrero": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:14260},
-    "2026": {desc:"Pilot programs under discussion; no confirmed projections.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Hidalgo": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3734},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Jalisco": {
-    "2025": {desc:"Fondo de Apoyo a Migrantes (state program supported by federal funds).", link:"https://www.jalisco.gob.mx", returnees:6048},
-    "2026": {desc:"Projected continuation of Fondo de Apoyo a Migrantes.", link:"https://www.jalisco.gob.mx"}
-  },
-  "Mexico City": {
-    "2025": {desc:"Multi-agency integration services.", link:"https://www.cdmx.gob.mx", returnees:3168},
-    "2026": {desc:"Projected multi-agency programs continue.", link:"https://www.cdmx.gob.mx"}
-  },
-  "Estado de México": {
-    "2025": {desc:"Fondo de Apoyo a Migrantes (state program active).", link:"https://www.edomex.gob.mx", returnees:7205},
-    "2026": {desc:"Projected continuation of Fondo de Apoyo a Migrantes.", link:"https://www.edomex.gob.mx"}
-  },
-  "Michoacán": {
-    "2025": {desc:"Pilot productive return programs active.", link:"https://www.gob.mx/bienestar", returnees:11388},
-    "2026": {desc:"Projected continuation of pilot productive return programs.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Morelos": {
-    "2025": {desc:"Morelos te Abraza active.", link:"https://www.morelos.gob.mx", returnees:1873},
-    "2026": {desc:"Projected continuation of Morelos te Abraza.", link:"https://www.morelos.gob.mx"}
-  },
-  "Nayarit": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2016},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Nuevo León": {
-    "2025": {desc:"Mexico Te Abraza operational. Employment-focused reintegration programs.", link:"https://www.nl.gob.mx", returnees:1152},
-    "2026": {desc:"Projected Mexico Te Abraza support continues.", link:"https://www.nl.gob.mx"}
-  },
-  "Oaxaca": {
-    "2025": {desc:"Oaxaca es tu Tierra program active. State reintegration programs and pilots.", link:"https://www.gob.mx/bienestar", returnees:12526},
-    "2026": {desc:"Projected continuation of Oaxaca es tu Tierra.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Puebla": {
-    "2025": {desc:"IPAM Puebla state program active.", link:"https://www.gob.mx/bienestar", returnees:9490},
-    "2026": {desc:"Projected continuation of IPAM Puebla.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Querétaro": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2304},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Quintana Roo": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:288},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "San Luis Potosí": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3746},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Sinaloa": {
-    "2025": {desc:"State and federal support for returned migrants.", link:"https://www.gob.mx/bienestar", returnees:5762},
-    "2026": {desc:"Projected continuation of support programs.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Sonora": {
-    "2025": {desc:"Mexico Te Abraza operational. Federal employment programs.", link:"https://www.gob.mx/bienestar", returnees:3318},
-    "2026": {desc:"Projected Mexico Te Abraza programs continue.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Tabasco": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:1152},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Tamaulipas": {
-    "2025": {desc:"Mexico Te Abraza operational. Federal + humanitarian response.", link:"https://www.gob.mx/bienestar", returnees:4753},
-    "2026": {desc:"Projected Mexico Te Abraza programs continue.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Tlaxcala": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:720},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Veracruz": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:9657},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Yucatán": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:288},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  },
-  "Zacatecas": {
-    "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3168},
-    "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"}
-  }
+  "Aguascalientes": { "2025": {desc:"No state-level reintegration program identified (2025). Federal options available.", link:"https://www.gob.mx/bienestar", returnees:1580}, "2026": {desc:"Projected program: none officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Baja California": { "2025": {desc:"Mexico Te Abraza operational. Federal and NGO programs support returned migrants.", link:"https://www.gob.mx/bienestar", returnees:3020}, "2026": {desc:"Mexico Te Abraza continues; no additional state-level programs projected.", link:"https://www.gob.mx/bienestar"} },
+  "Baja California Sur": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:144}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Campeche": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:432}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Chiapas": { "2025": {desc:"Refugee & migrant stabilization programs active. Federal options also available.", link:"https://www.gob.mx/bienestar", returnees:11660}, "2026": {desc:"Projected programs continue stabilization focus.", link:"https://www.gob.mx/bienestar"} },
+  "Chihuahua": { "2025": {desc:"Mexico Te Abraza operational. Federal and municipal support programs.", link:"https://www.gob.mx/bienestar", returnees:5180}, "2026": {desc:"Projected programs continue federal-municipal support.", link:"https://www.gob.mx/bienestar"} },
+  "Coahuila": { "2025": {desc:"Mexico Te Abraza operational. Federal employment linkage programs.", link:"https://www.gob.mx/bienestar", returnees:2016}, "2026": {desc:"Projected programs continue employment linkage.", link:"https://www.gob.mx/bienestar"} },
+  "Colima": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:576}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Durango": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2304}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Guanajuato": { "2025": {desc:"Conecta platform active. State reintegration program active.", link:"https://migrantequiero.guanajuato.gob.mx", returnees:9790}, "2026": {desc:"Projected Conecta program continues with job linkage support.", link:"https://migrantequiero.guanajuato.gob.mx"} },
+  "Guerrero": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:14260}, "2026": {desc:"Pilot programs under discussion; no confirmed projections.", link:"https://www.gob.mx/bienestar"} },
+  "Hidalgo": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3734}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Jalisco": { "2025": {desc:"Fondo de Apoyo a Migrantes (state program supported by federal funds).", link:"https://www.jalisco.gob.mx", returnees:6048}, "2026": {desc:"Projected continuation of Fondo de Apoyo a Migrantes.", link:"https://www.jalisco.gob.mx"} },
+  "Mexico City": { "2025": {desc:"Multi-agency integration services.", link:"https://www.cdmx.gob.mx", returnees:3168}, "2026": {desc:"Projected multi-agency programs continue.", link:"https://www.cdmx.gob.mx"} },
+  "Estado de México": { "2025": {desc:"Fondo de Apoyo a Migrantes (state program active).", link:"https://www.edomex.gob.mx", returnees:7205}, "2026": {desc:"Projected continuation of Fondo de Apoyo a Migrantes.", link:"https://www.edomex.gob.mx"} },
+  "Michoacán": { "2025": {desc:"Pilot productive return programs active.", link:"https://www.gob.mx/bienestar", returnees:11388}, "2026": {desc:"Projected continuation of pilot productive return programs.", link:"https://www.gob.mx/bienestar"} },
+  "Morelos": { "2025": {desc:"Morelos te Abraza active.", link:"https://www.morelos.gob.mx", returnees:1873}, "2026": {desc:"Projected continuation of Morelos te Abraza.", link:"https://www.morelos.gob.mx"} },
+  "Nayarit": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2016}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Nuevo León": { "2025": {desc:"Mexico Te Abraza operational. Employment-focused reintegration programs.", link:"https://www.nl.gob.mx", returnees:1152}, "2026": {desc:"Projected Mexico Te Abraza support continues.", link:"https://www.nl.gob.mx"} },
+  "Oaxaca": { "2025": {desc:"Oaxaca es tu Tierra program active. State reintegration programs and pilots.", link:"https://www.gob.mx/bienestar", returnees:12526}, "2026": {desc:"Projected continuation of Oaxaca es tu Tierra.", link:"https://www.gob.mx/bienestar"} },
+  "Puebla": { "2025": {desc:"IPAM Puebla state program active.", link:"https://www.gob.mx/bienestar", returnees:9490}, "2026": {desc:"Projected continuation of IPAM Puebla.", link:"https://www.gob.mx/bienestar"} },
+  "Querétaro": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:2304}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Quintana Roo": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:288}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "San Luis Potosí": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3746}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Sinaloa": { "2025": {desc:"State and federal support for returned migrants.", link:"https://www.gob.mx/bienestar", returnees:5762}, "2026": {desc:"Projected continuation of support programs.", link:"https://www.gob.mx/bienestar"} },
+  "Sonora": { "2025": {desc:"Mexico Te Abraza operational. Federal employment programs.", link:"https://www.gob.mx/bienestar", returnees:3318}, "2026": {desc:"Projected Mexico Te Abraza programs continue.", link:"https://www.gob.mx/bienestar"} },
+  "Tabasco": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:1152}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Tamaulipas": { "2025": {desc:"Mexico Te Abraza operational. Federal + humanitarian response.", link:"https://www.gob.mx/bienestar", returnees:4753}, "2026": {desc:"Projected Mexico Te Abraza programs continue.", link:"https://www.gob.mx/bienestar"} },
+  "Tlaxcala": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:720}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Veracruz": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:9657}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Yucatán": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:288}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} },
+  "Zacatecas": { "2025": {desc:"No state-level reintegration program identified (2025).", link:"https://www.gob.mx/bienestar", returnees:3168}, "2026": {desc:"No projected program officially reported.", link:"https://www.gob.mx/bienestar"} }
 };
 
 // State centroids (approx)
 var stateCoords = {
-  "Aguascalientes":[21.8853,-102.292],
-  "Baja California":[32.5149,-117.038],
-  "Baja California Sur":[24.1426,-110.313],
-  "Campeche":[19.8301,-90.5349],
-  "Chiapas":[16.7569,-93.1292],
-  "Chihuahua":[28.632,-106.069],
-  "Coahuila":[25.438,-100.974],
-  "Colima":[19.2433,-103.725],
-  "Durango":[24.0277,-104.653],
-  "Guanajuato":[21.019,-101.257],
-  "Guerrero":[17.5515,-99.5006],
-  "Hidalgo":[20.1011,-98.7624],
-  "Jalisco":[20.6597,-103.35],
-  "Mexico City":[19.4326,-99.1332],
-  "Estado de México":[19.2826,-99.6557],
-  "Michoacán":[19.5665,-101.707],
-  "Morelos":[18.6813,-99.1013],
-  "Nayarit":[21.7514,-104.846],
-  "Nuevo León":[25.6866,-100.316],
-  "Oaxaca":[17.0732,-96.7266],
-  "Puebla":[19.0414,-98.2063],
-  "Querétaro":[20.5888,-100.39],
-  "Quintana Roo":[19.1817,-88.4791],
-  "San Luis Potosí":[22.1565,-100.986],
-  "Sinaloa":[24.8091,-107.394],
-  "Sonora":[29.0729,-110.956],
-  "Tabasco":[17.8409,-92.6189],
-  "Tamaulipas":[23.7417,-99.1459],
-  "Tlaxcala":[19.3182,-98.2375],
-  "Veracruz":[19.1738,-96.1342],
-  "Yucatán":[20.7099,-89.0943],
+  "Aguascalientes":[21.8853,-102.292],"Baja California":[32.5149,-117.038],"Baja California Sur":[24.1426,-110.313],
+  "Campeche":[19.8301,-90.5349],"Chiapas":[16.7569,-93.1292],"Chihuahua":[28.632,-106.069],"Coahuila":[25.438,-100.974],
+  "Colima":[19.2433,-103.725],"Durango":[24.0277,-104.653],"Guanajuato":[21.019,-101.257],"Guerrero":[17.5515,-99.5006],
+  "Hidalgo":[20.1011,-98.7624],"Jalisco":[20.6597,-103.35],"Mexico City":[19.4326,-99.1332],"Estado de México":[19.2826,-99.6557],
+  "Michoacán":[19.5665,-101.707],"Morelos":[18.6813,-99.1013],"Nayarit":[21.7514,-104.846],"Nuevo León":[25.6866,-100.316],
+  "Oaxaca":[17.0732,-96.7266],"Puebla":[19.0414,-98.2063],"Querétaro":[20.5888,-100.39],"Quintana Roo":[19.1817,-88.4791],
+  "San Luis Potosí":[22.1565,-100.986],"Sinaloa":[24.8091,-107.394],"Sonora":[29.0729,-110.956],"Tabasco":[17.8409,-92.6189],
+  "Tamaulipas":[23.7417,-99.1459],"Tlaxcala":[19.3182,-98.2375],"Veracruz":[19.1738,-96.1342],"Yucatán":[20.7099,-89.0943],
   "Zacatecas":[22.7709,-102.583]
 };
 
-// Markers
+// Add markers
 var stateMarkers = {};
 for (var state in stateCoords) {
     var coords = stateCoords[state];
