@@ -35,17 +35,18 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
 <div class="legend">
 <strong>Mexico Return & Reintegration (2025–2026)</strong><br><br>
 
-Use the toggle (top-left) to switch between:<br>
-• <strong>State of origin</strong> (where people are from)<br>
-• <strong>State of destination</strong> (where people arrive)<br><br>
+Toggle layers (top-left):<br>
+• <strong>State of Origin</strong><br>
+• <strong>State of Destination</strong><br><br>
 
 Click a state to view:<br>
-• Returned Mexican nationals (2025)<br>
-• Active, pilot, or emerging reintegration programs (2026)<br><br>
+• 2025 returns<br>
+• 2026 forecast projection (+12%)<br>
+• Reintegration programs<br><br>
 
-<strong>Data source</strong><br>
+<strong>Data source:</strong><br>
 Unidad de Política Migratoria, Registro e Identidad de Personas (SEGOB)<br>
-<em>Boletín de Estadísticas Migratorias 2025 (enero–noviembre)</em><br><br>
+Boletín de Estadísticas Migratorias 2025 (ene–nov)<br><br>
 
 Total Mexican nationals returned (2025): <strong>144,061</strong>
 </div>
@@ -54,79 +55,125 @@ Total Mexican nationals returned (2025): <strong>144,061</strong>
 
 <script>
 const map = L.map("map").setView([23.5, -102], 5);
-L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
- { attribution:"© OpenStreetMap contributors" }).addTo(map);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+ attribution:"© OpenStreetMap contributors"
+}).addTo(map);
 
 /* ---------- CENTROIDS ---------- */
 const coords = {
-"Aguascalientes":[21.88,-102.29],"Baja California":[32.51,-117.03],
-"Baja California Sur":[24.14,-110.31],"Campeche":[19.83,-90.53],
-"Chiapas":[16.75,-93.12],"Chihuahua":[28.63,-106.07],
-"Coahuila":[25.43,-100.99],"Colima":[19.24,-103.72],
-"Durango":[24.03,-104.65],"Guanajuato":[21.01,-101.25],
-"Guerrero":[17.55,-99.50],"Hidalgo":[20.10,-98.76],
-"Jalisco":[20.65,-103.35],"Mexico City":[19.43,-99.13],
-"Estado de México":[19.28,-99.65],"Michoacán":[19.56,-101.70],
-"Morelos":[18.68,-99.10],"Nayarit":[21.75,-104.84],
-"Nuevo León":[25.68,-100.31],"Oaxaca":[17.07,-96.72],
-"Puebla":[19.04,-98.20],"Querétaro":[20.58,-100.39],
-"Quintana Roo":[19.18,-88.48],"San Luis Potosí":[22.15,-100.98],
-"Sinaloa":[24.80,-107.39],"Sonora":[29.07,-110.95],
-"Tabasco":[17.84,-92.61],"Tamaulipas":[23.74,-99.14],
-"Tlaxcala":[19.31,-98.23],"Veracruz":[19.17,-96.13],
-"Yucatán":[20.70,-89.09],"Zacatecas":[22.77,-102.58]
+"Aguascalientes":[21.88,-102.29],
+"Baja California":[32.51,-117.03],
+"Baja California Sur":[24.14,-110.31],
+"Campeche":[19.83,-90.53],
+"Chiapas":[16.75,-93.12],
+"Chihuahua":[28.63,-106.07],
+"Coahuila":[25.43,-100.99],
+"Colima":[19.24,-103.72],
+"Durango":[24.03,-104.65],
+"Guanajuato":[21.01,-101.25],
+"Guerrero":[17.55,-99.50],
+"Hidalgo":[20.10,-98.76],
+"Jalisco":[20.65,-103.35],
+"Mexico City":[19.43,-99.13],
+"Estado de México":[19.28,-99.65],
+"Michoacán":[19.56,-101.70],
+"Morelos":[18.68,-99.10],
+"Nayarit":[21.75,-104.84],
+"Nuevo León":[25.68,-100.31],
+"Oaxaca":[17.07,-96.72],
+"Puebla":[19.04,-98.20],
+"Querétaro":[20.58,-100.39],
+"Quintana Roo":[19.18,-88.48],
+"San Luis Potosí":[22.15,-100.98],
+"Sinaloa":[24.80,-107.39],
+"Sonora":[29.07,-110.95],
+"Tabasco":[17.84,-92.61],
+"Tamaulipas":[23.74,-99.14],
+"Tlaxcala":[19.31,-98.23],
+"Veracruz":[19.17,-96.13],
+"Yucatán":[20.70,-89.09],
+"Zacatecas":[22.77,-102.58]
 };
 
-/* ---------- RETURN DATA ---------- */
+/* ---------- 2025 RETURNS ---------- */
 const returns = {
-"Guerrero":{o:14260,d:10084},"Oaxaca":{o:12526,d:8644},
-"Chiapas":{o:11667,d:0},"Michoacán":{o:11388,d:8357},
-"Guanajuato":{o:9790,d:8357},"Veracruz":{o:9647,d:6761},
-"Puebla":{o:9490,d:7059},"Estado de México":{o:7205,d:6040},
-"Jalisco":{o:6048,d:4753},"Sinaloa":{o:5762,d:4322},
-"Tamaulipas":{o:4753,d:7635},"Sonora":{o:3318,d:5032},
+"Guerrero":{o:14260,d:10084},
+"Oaxaca":{o:12526,d:8644},
+"Chiapas":{o:11667,d:0},
+"Michoacán":{o:11388,d:8357},
+"Guanajuato":{o:9790,d:8357},
+"Veracruz":{o:9647,d:6761},
+"Puebla":{o:9490,d:7059},
+"Estado de México":{o:7205,d:6040},
+"Jalisco":{o:6048,d:4753},
+"Sinaloa":{o:5762,d:4322},
+"Tamaulipas":{o:4753,d:7635},
+"Sonora":{o:3318,d:5032},
 "Baja California":{o:3020,d:24072}
 };
 
-/* ---------- PROGRAMS (WITH LINKS) ---------- */
+/* ---------- 2026 FORECAST (+12%) ---------- */
+const forecastGrowth = 1.12;
+
+/* ---------- PROGRAMS ---------- */
 const programs = {
-"Morelos":`🟢 <a href="https://www.morelos.gob.mx" target="_blank">Morelos te Abraza</a><br>
-🟢 Migrantes en el Corazón`,
-"Puebla":`🟢 <a href="https://ipam.puebla.gob.mx" target="_blank">Instituto Poblano de Asistencia al Migrante</a><br>
-🟢 <a href="https://www.publimetro.com.mx/puebla/2025/03/04/centro-de-capacitacion-de-empleo-para-migrantes-repatriados-ubicacion-y-que-ofrecera/" target="_blank">Centro de Capacitación para el Empleo</a>`,
-"Guanajuato":`🟢 <a href="https://coneecta.net/" target="_blank">Conecta</a><br>
-🟡 <a href="https://migrantequiero.guanajuato.gob.mx" target="_blank">MigranteQuiero</a>`,
-"Michoacán":`🟡 <a href="https://ideasnet.org/microempresarios-latinoamericanos-y-retornados-en-mexico/" target="_blank">IDEASnet – Financial Inclusion</a>`,
-"Oaxaca":`🟢 <a href="https://www.oaxaca.gob.mx" target="_blank">Oaxaca es tu tierra</a>`,
-"Jalisco":`🟢 <a href="https://www.jalisco.gob.mx/es/gobierno/fondo-de-apoyo-migrantes" target="_blank">Fondo de Apoyo a Migrantes</a>`,
-"Tamaulipas":`🟢 <a href="https://accesolatino.org/camino/" target="_blank">Acceso Latino – CAMINO</a><br>
-⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano (México te Abraza)</a>`,
-"Baja California":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
-"Sonora":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
-"Chihuahua":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
-"Coahuila":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`,
-"Nuevo León":`⚪ <a href="https://miestatusbienestar.com.mx/noticias/conoce-la-tarjeta-paisano-la-nueva-ayuda-del-programa-del-bienestar/" target="_blank">Tarjeta Paisano</a>`
+"Morelos":`🟢 Morelos te Abraza<br>🟢 Migrantes en el Corazón`,
+"Puebla":`🟢 Instituto Poblano de Asistencia al Migrante`,
+"Guanajuato":`🟢 Conecta<br>🟡 MigranteQuiero`,
+"Michoacán":`🟡 IDEASnet – Financial Inclusion`,
+"Oaxaca":`🟢 Oaxaca es tu tierra`,
+"Jalisco":`🟢 Fondo de Apoyo a Migrantes`,
+"Tamaulipas":`🟢 Acceso Latino – CAMINO<br>⚪ Tarjeta Paisano`,
+"Baja California":`⚪ Tarjeta Paisano`,
+"Sonora":`⚪ Tarjeta Paisano`,
+"Chihuahua":`⚪ Tarjeta Paisano`,
+"Coahuila":`⚪ Tarjeta Paisano`,
+"Nuevo León":`⚪ Tarjeta Paisano`
 };
 
 /* ---------- LAYERS ---------- */
 const origin = L.layerGroup();
 const destination = L.layerGroup();
 
-Object.keys(coords).forEach(s=>{
+Object.keys(coords).forEach(s => {
+
   const r = returns[s] || {o:0,d:0};
   const p = programs[s] || "Federal reintegration programs available nationwide";
 
-  L.marker(coords[s]).bindPopup(
-    `<strong>${s}</strong><br>
-    <strong>Returned (origin, 2025):</strong> ${r.o.toLocaleString()}<br><br>
-    <strong>Programs:</strong><br>${p}`
-  ).addTo(origin);
+  const forecastOrigin = Math.round(r.o * forecastGrowth);
+  const forecastDestination = Math.round(r.d * forecastGrowth);
 
-  L.marker(coords[s]).bindPopup(
-    `<strong>${s}</strong><br>
-    <strong>Returned (destination, 2025):</strong> ${r.d.toLocaleString()}<br><br>
+  L.circleMarker(coords[s], {
+    radius: 6 + (r.o / 4000),
+    fillColor: "#2563eb",
+    color: "#1e3a8a",
+    weight: 1,
+    fillOpacity: 0.75
+  })
+  .bindPopup(
+    `<strong>${s}</strong><br><br>
+    <strong>Returned (Origin, 2025):</strong> ${r.o.toLocaleString()}<br>
+    <strong>Projected 2026:</strong> ${forecastOrigin.toLocaleString()}<br><br>
     <strong>Programs:</strong><br>${p}`
-  ).addTo(destination);
+  )
+  .addTo(origin);
+
+  L.circleMarker(coords[s], {
+    radius: 6 + (r.d / 4000),
+    fillColor: "#16a34a",
+    color: "#065f46",
+    weight: 1,
+    fillOpacity: 0.75
+  })
+  .bindPopup(
+    `<strong>${s}</strong><br><br>
+    <strong>Returned (Destination, 2025):</strong> ${r.d.toLocaleString()}<br>
+    <strong>Projected 2026:</strong> ${forecastDestination.toLocaleString()}<br><br>
+    <strong>Programs:</strong><br>${p}`
+  )
+  .addTo(destination);
+
 });
 
 origin.addTo(map);
@@ -136,6 +183,7 @@ L.control.layers(
   null,
   { position:"topleft", collapsed:false }
 ).addTo(map);
+
 </script>
 
 </body>
