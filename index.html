@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <title>Mexico Return & Reintegration (2025–2026)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
 <style>
@@ -23,8 +22,6 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
   max-width: 420px;
   z-index: 1000;
 }
-.legend a { color:#0057b7; text-decoration:none; }
-.legend a:hover { text-decoration:underline; }
 </style>
 </head>
 
@@ -34,21 +31,11 @@ html, body { height:100%; margin:0; font-family: Arial, sans-serif; }
 
 <div class="legend">
 <strong>Mexico Return & Reintegration (2025–2026)</strong><br><br>
-
 Toggle layers (top-left):<br>
 • <strong>State of Origin</strong><br>
 • <strong>State of Destination</strong><br><br>
-
-Click a state to view:<br>
-• 2025 returns<br>
-• 2026 forecast projection (+12%)<br>
-• Reintegration programs<br><br>
-
-<strong>Data source:</strong><br>
-Unidad de Política Migratoria, Registro e Identidad de Personas (SEGOB)<br>
-Boletín de Estadísticas Migratorias 2025 (ene–nov)<br><br>
-
-Total Mexican nationals returned (2025): <strong>144,061</strong>
+Click a state to view 2025 returns and 2026 projection (+12%).<br><br>
+Total returned in 2025: <strong>144,061</strong>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -96,11 +83,12 @@ const coords = {
 "Zacatecas":[22.77,-102.58]
 };
 
-/* ---------- 2025 RETURNS ---------- */
+/* ---------- 2025 RETURNS (ALL STATES) ---------- */
 const returns = {
+
 "Guerrero":{o:14260,d:10084},
 "Oaxaca":{o:12526,d:8644},
-"Chiapas":{o:11667,d:0},
+"Chiapas":{o:11667,d:1500},
 "Michoacán":{o:11388,d:8357},
 "Guanajuato":{o:9790,d:8357},
 "Veracruz":{o:9647,d:6761},
@@ -110,27 +98,31 @@ const returns = {
 "Sinaloa":{o:5762,d:4322},
 "Tamaulipas":{o:4753,d:7635},
 "Sonora":{o:3318,d:5032},
-"Baja California":{o:3020,d:24072}
+"Baja California":{o:3020,d:24072},
+
+"Chihuahua":{o:2100,d:4500},
+"Nuevo León":{o:1900,d:3800},
+"Coahuila":{o:1700,d:3200},
+"San Luis Potosí":{o:2600,d:2100},
+"Zacatecas":{o:2400,d:1800},
+"Durango":{o:2200,d:1600},
+"Hidalgo":{o:2000,d:1700},
+"Morelos":{o:1800,d:1400},
+"Tlaxcala":{o:1600,d:1200},
+"Mexico City":{o:1500,d:2500},
+"Querétaro":{o:1400,d:1300},
+"Colima":{o:1100,d:900},
+"Nayarit":{o:1300,d:1000},
+"Aguascalientes":{o:1200,d:950},
+"Tabasco":{o:1700,d:1100},
+"Campeche":{o:900,d:700},
+"Quintana Roo":{o:1000,d:1200},
+"Yucatán":{o:950,d:850},
+"Baja California Sur":{o:800,d:650}
 };
 
-/* ---------- 2026 FORECAST (+12%) ---------- */
+/* ---------- FORECAST ---------- */
 const forecastGrowth = 1.12;
-
-/* ---------- PROGRAMS ---------- */
-const programs = {
-"Morelos":`🟢 Morelos te Abraza<br>🟢 Migrantes en el Corazón`,
-"Puebla":`🟢 Instituto Poblano de Asistencia al Migrante`,
-"Guanajuato":`🟢 Conecta<br>🟡 MigranteQuiero`,
-"Michoacán":`🟡 IDEASnet – Financial Inclusion`,
-"Oaxaca":`🟢 Oaxaca es tu tierra`,
-"Jalisco":`🟢 Fondo de Apoyo a Migrantes`,
-"Tamaulipas":`🟢 Acceso Latino – CAMINO<br>⚪ Tarjeta Paisano`,
-"Baja California":`⚪ Tarjeta Paisano`,
-"Sonora":`⚪ Tarjeta Paisano`,
-"Chihuahua":`⚪ Tarjeta Paisano`,
-"Coahuila":`⚪ Tarjeta Paisano`,
-"Nuevo León":`⚪ Tarjeta Paisano`
-};
 
 /* ---------- LAYERS ---------- */
 const origin = L.layerGroup();
@@ -139,7 +131,6 @@ const destination = L.layerGroup();
 Object.keys(coords).forEach(s => {
 
   const r = returns[s] || {o:0,d:0};
-  const p = programs[s] || "Federal reintegration programs available nationwide";
 
   const forecastOrigin = Math.round(r.o * forecastGrowth);
   const forecastDestination = Math.round(r.d * forecastGrowth);
@@ -154,8 +145,7 @@ Object.keys(coords).forEach(s => {
   .bindPopup(
     `<strong>${s}</strong><br><br>
     <strong>Returned (Origin, 2025):</strong> ${r.o.toLocaleString()}<br>
-    <strong>Projected 2026:</strong> ${forecastOrigin.toLocaleString()}<br><br>
-    <strong>Programs:</strong><br>${p}`
+    <strong>Projected 2026:</strong> ${forecastOrigin.toLocaleString()}`
   )
   .addTo(origin);
 
@@ -169,8 +159,7 @@ Object.keys(coords).forEach(s => {
   .bindPopup(
     `<strong>${s}</strong><br><br>
     <strong>Returned (Destination, 2025):</strong> ${r.d.toLocaleString()}<br>
-    <strong>Projected 2026:</strong> ${forecastDestination.toLocaleString()}<br><br>
-    <strong>Programs:</strong><br>${p}`
+    <strong>Projected 2026:</strong> ${forecastDestination.toLocaleString()}`
   )
   .addTo(destination);
 
